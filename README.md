@@ -9,4 +9,4 @@ To find out how to use PoopScript, please look at the documentation. To use the 
 # Tools
 Following "IDEs" are available:
 * [Poopscripter IDE](https://github.com/FreeBSoD/Poopscripter/) (thanks to @FreeBSoD) (no syntax highlighting & auto completion or error detection)
-* [PooIDE](https://goldenretriveryt.github.io/PoopScript/pooide/) (also no syntax highlighting, auto completion or error detection)
+* [PooIDE](https://goldenretriveryt.github.io/PoopScript/pooide/) (also no syntax highlighting or error detection but basic auto completion)
