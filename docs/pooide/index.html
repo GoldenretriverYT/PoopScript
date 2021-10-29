@@ -33,7 +33,7 @@
             "custom": ["run", "runIn", "runEvery", "runIf", "runIfElse", "repeat", "returnString", "returnNumber"]
         }
 
-        var acSelIndex = 0;
+        var acSelIndex = -1;
 
         var env = new PoopScriptEnv();
         env.setCustomConsoleHandler(customConsole);
@@ -84,10 +84,26 @@
         window.onkeydown = (ev) => {
             var textArea = document.getElementById("code");
             var ac = document.getElementById("ac");
+            var acInsert = false;
 
             if(ev.key == "Tab" && document.activeElement == textArea) {
                 ev.preventDefault();
-                insertAtCursor(textArea, "\t");
+
+                if(ac.style.display == "none") {
+                    insertAtCursor(textArea, "\t");
+                } else {
+                    acInsert = true;
+                }
+            }
+
+            if(ev.key == "ArrowDown" && ac.style.display == "") {
+                ev.preventDefault();
+                acSelIndex++;
+            }
+
+            if(ev.key == "ArrowUp" && ac.style.display == "") {
+                ev.preventDefault();
+                acSelIndex--;
             }
 
             setTimeout(() => { // timeout slightly to wait for the event to finish first
@@ -109,21 +125,39 @@
                     }
                 }
 
+                if(acSelIndex >= acList.length) {
+                    acSelIndex = 0;
+                }
+
+                if(acSelIndex < 0) {
+                    acSelIndex = acList.length-1;
+                }
+
                 if(acList.length > 0){
                     ac.style.display = "";
                     
-                    var entryTemp = `<button class="ac-el" onclick="insertAtCursor(document.getElementById('code'), '{1}');">{0}</div>`;
+                    var entryTemp = `<button class="ac-el {2}" onclick="insertAtCursor(document.getElementById('code'), '{1}');" data-in="{1}">{0}</div>`;
                     var acInnerHTML = "";
 
                     var i = 0;
                     for(var acEntry of acList) {
+                        if(acInsert && i == acSelIndex) {
+                            insertAtCursor(textArea, acEntry.replace(sel[1], ""));
+
+                            acSelIndex = -1;
+                            ac.style.display = "none";
+                            break;
+                        }
+
                         acInnerHTML += entryTemp.replace(/\{0\}/g, acEntry)
-                                                .replace(/\{1\}/g, acEntry.replace(sel[1], ""));
+                                                .replace(/\{1\}/g, acEntry.replace(sel[1], ""))
+                                                .replace(/\{2\}/g, (i == acSelIndex ? "ac-el-sel" : ""));
                         i++;
                     }
 
                     ac.innerHTML = acInnerHTML;
                 }else {
+                    acSelIndex = -1;
                     ac.style.display = "none";
                 }
             }, 5);
@@ -131,6 +165,7 @@
 
         window.onclick = () => {
             var ac = document.getElementById("ac");
+            acSelIndex = -1;
             ac.style.display = "none";
         }
 
@@ -252,8 +287,8 @@
                 textArea.value = textArea.value.substr(0, selStart) + str + textArea.value.substr(textArea.selectionEnd);
             }
 
-            textArea.selectionStart = selStart+1;
-            textArea.selectionEnd = selStart+1;
+            textArea.selectionStart = selStart+str.length;
+            textArea.selectionEnd = selStart+str.length;
         }
     </script>
 

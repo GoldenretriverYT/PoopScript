@@ -52,6 +52,10 @@ textarea:read-only {
     background-color: #303030;
 }
 
+.ac-el-sel {
+    background-color: #444444;
+}
+
 .debug-div {
     width: 90vw;
     height: 10vh;
