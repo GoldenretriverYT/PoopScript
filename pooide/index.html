@@ -1,0 +1,110 @@
+<head>
+    <script src="main.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <script>
+        var customConsole = {
+            log: (...args) => {
+                document.getElementById("output").value = document.getElementById("output").value + ("LOG: " + args.join(" ")) + "\n";
+                document.getElementById("output").scrollTop = document.getElementById("output").scrollHeight;
+            },
+            lognnl: (...args) => {
+                document.getElementById("output").value = document.getElementById("output").value + args.join(" ");
+                document.getElementById("output").scrollTop = document.getElementById("output").scrollHeight;
+            },
+            warn: (...args) => {
+                document.getElementById("output").value = document.getElementById("output").value + ("WARN: " + args.join(" ")) + "\n";
+                document.getElementById("output").scrollTop = document.getElementById("output").scrollHeight;
+            },
+            error: (...args) => {
+                document.getElementById("output").value = document.getElementById("output").value + ("ERROR: " + args.join(" ")) + "\n";
+                document.getElementById("output").scrollTop = document.getElementById("output").scrollHeight;
+            }
+        }
+
+        var env = new PoopScriptEnv();
+        env.setCustomConsoleHandler(customConsole);
+
+        function pseval() {
+            customConsole.log("Started execution...");
+            var start = Date.now();
+
+            try{
+                env.exec(document.getElementById("code").value);
+                customConsole.log("Finished execution of " + document.getElementById("code").value.split(";").length + " operations after " + (Date.now()-start) + "ms");
+            }catch(err) {
+                alert(err);
+            }
+        }
+
+        function psregen() {
+            customConsole.log("Regenerated environment.");
+            env = new PoopScriptEnv();
+            env.setCustomConsoleHandler(customConsole);
+        }
+
+        function psstrict(b) {
+            customConsole.log("Set strict mode enabled to " + b);
+            env.setStrict(b);
+        }
+
+        window.onload = () => {
+            setInterval(() => {
+                var varDbgRes = "";
+
+                for(var v of Object.keys(env.GLOBAL_VARS)) {
+                    varDbgRes += "<div style=\"width: 100%; height: 20px; font-size: 16px; line-height: 20px; padding-left: 5px;\">" + v + ": " + env.GLOBAL_VARS[v] + "</div>";
+                }
+
+                document.getElementById("vars").innerHTML = varDbgRes;
+
+                var funcDbgRes = "";
+
+                for(var f of Object.keys(env.CUSTOM_FUNCTIONS)) {
+                    funcDbgRes += "<div style=\"width: 100%; height: 20px; font-size: 16px; line-height: 20px; padding-left: 5px;\">" + f + ": " + env.CUSTOM_FUNCTIONS[f].length + " instructions" + "</div>";
+                }
+
+                document.getElementById("funcs").innerHTML = funcDbgRes;
+            }, 250);
+        }
+
+        var customTextareas = {
+            "code": {
+                "text": "",
+                "syntax": "psl",
+                "cursor": 0
+            }
+        }
+
+        var focused = null;
+
+        window.onkeydown = (ev) => {
+            if(focused == null) return;
+
+            if(ev.key == "Enter") {
+                
+            }
+        }
+
+        window.onclick = (ev) => {
+            if(ev.region in customTextareas) {
+                focused = ev.region;
+                return;
+            }
+
+            focused = null;
+        }
+    </script>
+
+    <h1>PooIDE</h1>
+    <div class="custom-textarea" id="code" style="width: 90vw; height: 25vh; margin-bottom: 5px;" placeholder="Input..."></div>
+    <textarea id="output" readonly="true" style="width: 90vw; height: 25vh; margin-top: 5px;" placeholder="Output..."></textarea><br><br>
+    <button onclick="pseval();" class="btn-editor">Evaluate</button>
+    <button onclick="psregen();" class="btn-editor">Regenerate Environment</button>
+    <button onclick="psstrict(false);" class="btn-editor">Disable strict mode</button>
+    <button onclick="psstrict(true);" class="btn-editor">Enable strict mode</button><br><br>
+    <span>Global vars:</span><div id="vars" class="debug-div"></div><br>
+    Custom functions: <div id="funcs" class="debug-div"></div>
+</body>

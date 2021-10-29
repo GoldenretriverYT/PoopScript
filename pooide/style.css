@@ -1,0 +1,53 @@
+* {
+    font-family: Arial;
+    color: white;
+}
+
+body {
+    background-color: #2e2e2e;
+}
+
+button {
+    background-color: #385cbe;
+    border-radius: 5px;
+    height: 24px;
+    font-size: 16px;
+    line-height: 24px;
+    border: 0px solid black;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #2f4c9b;
+}
+
+.btn-editor {
+    width: 200px;
+}
+
+textarea {
+    background-color: #242424;
+    border-radius: 5px;
+    resize: none;
+    border: 2px solid black;
+}
+
+textarea:read-only {
+    cursor: not-allowed;
+}
+
+.custom-textarea {
+    background-color: #242424;
+    border-radius: 5px;
+    border: 2px solid black;
+}
+
+.debug-div {
+    width: 90vw;
+    height: 10%;
+    border-radius: 5px;
+    border: black 2px solid;
+    overflow-y: auto;
+    overflow-x: hidden;
+    margin-top: 5px;
+}
