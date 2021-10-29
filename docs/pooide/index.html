@@ -24,6 +24,16 @@
             }
         }
 
+        var acObj = {
+            "": ["alert", "log", "print", "warn", "error", "eval", "throw", "pause"],
+            "math": ["sum", "sub", "div", "mul", "pow", "sqrt", "sin", "cos", "tan", "sinh", "cosh", "tanh"],
+            "global": ["set", "assign", "setType", "unset"],
+            "array": ["push", "pop", "set"],
+            "custom": ["run", "runIn", "runEvery", "runIf", "runIfElse", "repeat", "returnString", "returnNumber"]
+        }
+
+        var acSelIndex = 0;
+
         var env = new PoopScriptEnv();
         env.setCustomConsoleHandler(customConsole);
 
@@ -72,24 +82,181 @@
 
         window.onkeydown = (ev) => {
             var textArea = document.getElementById("code");
+            var ac = document.getElementById("ac");
 
             if(ev.key == "Tab" && document.activeElement == textArea) {
                 ev.preventDefault();
-                var selStart = textArea.selectionStart;
+                insertAtCursor(textArea, "\t");
+            }
 
-                if(selStart == textArea.selectionEnd) {
-                    textArea.value = textArea.value.substr(0, selStart) + "\t" + textArea.value.substr(selStart);
-                }else {
-                    textArea.value = textArea.value.substr(0, selStart) + "\t" + textArea.value.substr(textArea.selectionEnd);
+            setTimeout(() => { // timeout slightly to wait for the event to finish first
+                var rect = getTextBoundingRect(textArea, textArea.selectionStart, textArea.selectionEnd, false);
+                ac.style.left = rect.left;
+                ac.style.top = rect.top+40;
+
+                var words = textArea.value.substr(0, textArea.selectionStart).split(" ");
+                var lastWord = words[words.length-1];
+                var sel = lastWord.split("->");
+
+                var acList = [];
+
+                if(sel.length > 1) {
+                    if(sel[0] in acObj) {
+                        acList = acObj[sel[0]];
+                    }
                 }
 
-                textArea.selectionStart = selStart+1;
-                textArea.selectionEnd = selStart+1;
+                if(acList.length > 0){
+                    ac.style.display = "";
+                    
+                    var entryTemp = `<button class="ac-el" onclick="insertAtCursor(document.getElementById('code'), '{0}');">{0}</div>`;
+                    var acInnerHTML = "";
+
+                    var i = 0;
+                    for(var acEntry of acList) {
+                        acInnerHTML += entryTemp.replace(/\{0\}/g, acEntry);
+                        i++;
+                    }
+
+                    ac.innerHTML = acInnerHTML;
+                }else {
+                    ac.style.display = "none";
+                }
+            }, 5);
+        }
+
+        window.onclick = () => {
+            var ac = document.getElementById("ac");
+            ac.style.display = "none";
+        }
+
+        // @author Rob W       https://stackoverflow.com/users/938089/rob-w
+        // @name               getTextBoundingRect
+        // @param input          Required HTMLElement with `value` attribute
+        // @param selectionStart Optional number: Start offset. Default 0
+        // @param selectionEnd   Optional number: End offset. Default selectionStart
+        // @param debug          Optional boolean. If true, the created test layer
+        //                         will not be removed.
+        function getTextBoundingRect(input, selectionStart, selectionEnd, debug) {
+            // Basic parameter validation
+            if(!input || !('value' in input)) return input;
+            if(typeof selectionStart == "string") selectionStart = parseFloat(selectionStart);
+            if(typeof selectionStart != "number" || isNaN(selectionStart)) {
+                selectionStart = 0;
             }
+            if(selectionStart < 0) selectionStart = 0;
+            else selectionStart = Math.min(input.value.length, selectionStart);
+            if(typeof selectionEnd == "string") selectionEnd = parseFloat(selectionEnd);
+            if(typeof selectionEnd != "number" || isNaN(selectionEnd) || selectionEnd < selectionStart) {
+                selectionEnd = selectionStart;
+            }
+            if (selectionEnd < 0) selectionEnd = 0;
+            else selectionEnd = Math.min(input.value.length, selectionEnd);
+
+            // If available (thus IE), use the createTextRange method
+            if (typeof input.createTextRange == "function") {
+                var range = input.createTextRange();
+                range.collapse(true);
+                range.moveStart('character', selectionStart);
+                range.moveEnd('character', selectionEnd - selectionStart);
+                return range.getBoundingClientRect();
+            }
+            // createTextRange is not supported, create a fake text range
+            var offset = getInputOffset(),
+                topPos = offset.top,
+                leftPos = offset.left,
+                width = getInputCSS('width', true),
+                height = getInputCSS('height', true);
+
+                // Styles to simulate a node in an input field
+            var cssDefaultStyles = "white-space:pre;padding:0;margin:0;",
+                listOfModifiers = ['direction', 'font-family', 'font-size', 'font-size-adjust', 'font-variant', 'font-weight', 'font-style', 'letter-spacing', 'line-height', 'text-align', 'text-indent', 'text-transform', 'word-wrap', 'word-spacing'];
+
+            topPos += getInputCSS('padding-top', true);
+            topPos += getInputCSS('border-top-width', true);
+            leftPos += getInputCSS('padding-left', true);
+            leftPos += getInputCSS('border-left-width', true);
+            leftPos += 1; //Seems to be necessary
+
+            for (var i=0; i<listOfModifiers.length; i++) {
+                var property = listOfModifiers[i];
+                cssDefaultStyles += property + ':' + getInputCSS(property) +';';
+            }
+            // End of CSS variable checks
+
+            var text = input.value,
+                textLen = text.length,
+                fakeClone = document.createElement("div");
+            if(selectionStart > 0) appendPart(0, selectionStart);
+            var fakeRange = appendPart(selectionStart, selectionEnd);
+            if(textLen > selectionEnd) appendPart(selectionEnd, textLen);
+
+            // Styles to inherit the font styles of the element
+            fakeClone.style.cssText = cssDefaultStyles;
+
+            // Styles to position the text node at the desired position
+            fakeClone.style.position = "absolute";
+            fakeClone.style.top = topPos + "px";
+            fakeClone.style.left = leftPos + "px";
+            fakeClone.style.width = width + "px";
+            fakeClone.style.height = height + "px";
+            document.body.appendChild(fakeClone);
+            var returnValue = fakeRange.getBoundingClientRect(); //Get rect
+
+            if (!debug) fakeClone.parentNode.removeChild(fakeClone); //Remove temp
+            return returnValue;
+
+            // Local functions for readability of the previous code
+            function appendPart(start, end){
+                var span = document.createElement("span");
+                span.style.cssText = cssDefaultStyles; //Force styles to prevent unexpected results
+                span.textContent = text.substring(start, end);
+                fakeClone.appendChild(span);
+                return span;
+            }
+            // Computing offset position
+            function getInputOffset(){
+                var body = document.body,
+                    win = document.defaultView,
+                    docElem = document.documentElement,
+                    box = document.createElement('div');
+                box.style.paddingLeft = box.style.width = "1px";
+                body.appendChild(box);
+                var isBoxModel = box.offsetWidth == 2;
+                body.removeChild(box);
+                box = input.getBoundingClientRect();
+                var clientTop  = docElem.clientTop  || body.clientTop  || 0,
+                    clientLeft = docElem.clientLeft || body.clientLeft || 0,
+                    scrollTop  = win.pageYOffset || isBoxModel && docElem.scrollTop  || body.scrollTop,
+                    scrollLeft = win.pageXOffset || isBoxModel && docElem.scrollLeft || body.scrollLeft;
+                return {
+                    top : box.top  + scrollTop  - clientTop,
+                    left: box.left + scrollLeft - clientLeft};
+            }
+            function getInputCSS(prop, isnumber){
+                var val = document.defaultView.getComputedStyle(input, null).getPropertyValue(prop);
+                return isnumber ? parseFloat(val) : val;
+            }
+        }
+
+        function insertAtCursor(textArea, str) {
+            var selStart = textArea.selectionStart;
+
+            if(selStart == textArea.selectionEnd) {
+                textArea.value = textArea.value.substr(0, selStart) + str + textArea.value.substr(selStart);
+            }else {
+                textArea.value = textArea.value.substr(0, selStart) + str + textArea.value.substr(textArea.selectionEnd);
+            }
+
+            textArea.selectionStart = selStart+1;
+            textArea.selectionEnd = selStart+1;
         }
     </script>
 
     <h1>PooIDE</h1>
+    <div id="ac" style="position: absolute; width: 10vw; height: auto; background-color: #414141; border-radius: 10px; display: none;">
+        <button class="ac-el" onclick="">--> def</div>
+    </div>
     <textarea id="code" style="width: 90vw; height: 25vh; margin-bottom: 5px;" placeholder="Input..."></textarea>
     <textarea id="output" readonly="true" style="width: 90vw; height: 25vh; margin-top: 5px;" placeholder="Output..."></textarea><br><br>
     <button onclick="pseval();" class="btn-editor">Evaluate</button>

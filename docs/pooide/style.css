@@ -32,8 +32,24 @@ textarea {
     border: 2px solid black;
 }
 
+.codeinput {
+    background-color: #242424;
+    border-radius: 5px;
+    resize: none;
+    border: 2px solid black;
+}
+
 textarea:read-only {
     cursor: not-allowed;
+}
+
+.ac-el {
+    width: 10vw;
+    height: 25px;
+    font-size: 18px;
+    line-height: 25px;
+    text-align: center;
+    background-color: #303030;
 }
 
 .debug-div {
