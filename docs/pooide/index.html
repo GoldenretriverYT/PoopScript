@@ -86,6 +86,13 @@
             var ac = document.getElementById("ac");
             var acInsert = false;
 
+            if(ev.key == "e" && ev.ctrlKey) {
+                ev.preventDefault();
+                ev.stopImmediatePropagation();
+                pseval();
+                return false;
+            }
+
             if(ev.key == "Tab" && document.activeElement == textArea) {
                 ev.preventDefault();
 
@@ -298,7 +305,7 @@
     </div>
     <textarea id="code" style="width: 90vw; height: 25vh; margin-bottom: 5px;" placeholder="Input..."></textarea>
     <textarea id="output" readonly="true" style="width: 90vw; height: 25vh; margin-top: 5px;" placeholder="Output..."></textarea><br><br>
-    <button onclick="pseval();" class="btn-editor">Evaluate</button>
+    <button onclick="pseval();" class="btn-editor">Evaluate (CTRL+E)</button>
     <button onclick="psregen();" class="btn-editor">Regenerate Environment</button>
     <button onclick="psstrict(false);" class="btn-editor">Disable strict mode</button>
     <button onclick="psstrict(true);" class="btn-editor">Enable strict mode</button><br><br>
