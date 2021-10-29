@@ -70,36 +70,27 @@
             }, 250);
         }
 
-        var customTextareas = {
-            "code": {
-                "text": "",
-                "syntax": "psl",
-                "cursor": 0
-            }
-        }
-
-        var focused = null;
-
         window.onkeydown = (ev) => {
-            if(focused == null) return;
+            var textArea = document.getElementById("code");
 
-            if(ev.key == "Enter") {
-                
+            if(ev.key == "Tab" && document.activeElement == textArea) {
+                ev.preventDefault();
+                var selStart = textArea.selectionStart;
+
+                if(selStart == textArea.selectionEnd) {
+                    textArea.value = textArea.value.substr(0, selStart) + "\t" + textArea.value.substr(selStart);
+                }else {
+                    textArea.value = textArea.value.substr(0, selStart) + "\t" + textArea.value.substr(textArea.selectionEnd);
+                }
+
+                textArea.selectionStart = selStart+1;
+                textArea.selectionEnd = selStart+1;
             }
-        }
-
-        window.onclick = (ev) => {
-            if(ev.region in customTextareas) {
-                focused = ev.region;
-                return;
-            }
-
-            focused = null;
         }
     </script>
 
     <h1>PooIDE</h1>
-    <div class="custom-textarea" id="code" style="width: 90vw; height: 25vh; margin-bottom: 5px;" placeholder="Input..."></div>
+    <textarea id="code" style="width: 90vw; height: 25vh; margin-bottom: 5px;" placeholder="Input..."></textarea>
     <textarea id="output" readonly="true" style="width: 90vw; height: 25vh; margin-top: 5px;" placeholder="Output..."></textarea><br><br>
     <button onclick="pseval();" class="btn-editor">Evaluate</button>
     <button onclick="psregen();" class="btn-editor">Regenerate Environment</button>

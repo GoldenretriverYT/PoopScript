@@ -36,15 +36,9 @@ textarea:read-only {
     cursor: not-allowed;
 }
 
-.custom-textarea {
-    background-color: #242424;
-    border-radius: 5px;
-    border: 2px solid black;
-}
-
 .debug-div {
     width: 90vw;
-    height: 10%;
+    height: 10vh;
     border-radius: 5px;
     border: black 2px solid;
     overflow-y: auto;
