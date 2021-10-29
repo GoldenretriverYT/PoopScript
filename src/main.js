@@ -1,8 +1,3 @@
-/**
- * - license here -
- * @preserve
- */
-
 class PoopScriptEnv {
     GLOBAL_VARS = {};
     #console = null;
