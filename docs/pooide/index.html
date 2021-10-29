@@ -102,19 +102,22 @@
 
                 if(sel.length > 1) {
                     if(sel[0] in acObj) {
-                        acList = acObj[sel[0]];
+                        for(acSObj of acObj[sel[0]]) {
+                            if(acSObj.startsWith(sel[1])) acList.push(acSObj);
+                        }
                     }
                 }
 
                 if(acList.length > 0){
                     ac.style.display = "";
                     
-                    var entryTemp = `<button class="ac-el" onclick="insertAtCursor(document.getElementById('code'), '{0}');">{0}</div>`;
+                    var entryTemp = `<button class="ac-el" onclick="insertAtCursor(document.getElementById('code'), '{1}');">{0}</div>`;
                     var acInnerHTML = "";
 
                     var i = 0;
                     for(var acEntry of acList) {
-                        acInnerHTML += entryTemp.replace(/\{0\}/g, acEntry);
+                        acInnerHTML += entryTemp.replace(/\{0\}/g, acEntry)
+                                                .replace(/\{1\}/g, acEntry.replace(sel[1], ""));
                         i++;
                     }
 
