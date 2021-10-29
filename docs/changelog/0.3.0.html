@@ -1,0 +1,87 @@
+<head>
+    <link rel="stylesheet" href="../style/style.css"/>
+    <title>PoopScriptDocs - Version 0.3.0</title>
+</head>
+<body>
+    <script>
+        window.onload = () => {
+            var els = document.getElementsByClassName("navElem");
+
+            for(el of els) {
+                addNavClick(el, el.getAttribute("data-goto"));
+            }
+        }
+
+        function addNavClick(el, to) {
+            el.addEventListener("click", (ev) => {
+                window.history.pushState({}, to, '#' + to);
+
+                document.getElementById(to).scrollIntoView({
+                    "behavior": "smooth"
+                });
+            });
+        }
+    </script>
+
+    <div class="nav" style="position: fixed; top: 0; left: 0;">
+        <div class="navElem" data-goto="title">Version 0.3.0</div>
+        <div class="navElem" data-goto="summary">Summary</div>
+        <div class="navElem" data-goto="new">New</div>
+        <div class="navElem" data-goto="changed">Changed</div>
+        <div class="navElem" data-goto="other">Other notes</div>
+    </div>
+    <div class="content" style="margin-left: 16vw;">
+        <h1 id="title">Version 0.3.0</h1>
+        <h3>Changelog</h3>
+        <span id="summary">Version 0.3.0 added more features like new set var operators.</span>
+
+        <br><h3 id="new">New</h3>
+        <h4>Comments</h4>
+        You can now create comments. Comments must however always end with a semi-colon, otherwise the interpreter does not detect the end. Example:
+        <code class="fullWidth">
+            //> my comment;<br><br>
+            &lt;&lt;//<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;my multi-line comment :)<br>
+            //>>;
+        </code>
+        <br><br><br>
+        <h4>New assignment operators when setting variables</h4>
+        When doing <code>global->set myVar = 1</code>, you can now use +=, -=, -- and ++! += also supports strings.<br><br>
+        <code class="fullWidth">
+            global->set myVar = 1;<br>
+            //> myVar = 1;<br>
+            global->set myVar += 5;<br>
+            //> myVar = 6;<br>
+            global->set myVar --;<br>
+            //> myVar = 5 - the space is important by the way<br>
+        </code>
+
+        <br><br><br>
+        <h4>Repeating, delaying and infinite looping of functions</h4>
+        You can now use <code>custom->runIn [funcName] [ms]</code> to delay the execution (does not block the thread)<br>Want to infinitely loop your function? Use <code>custom->runEvery [funcName] [ms]</code> to run your function every x ms (does not block the thread)<br>You can also use <code>custom->repeat [x times] [every x ms] [funcName]</code> to repeat your function x times, with a delay of x ms every execution (does not block the thread if ms > 0)
+
+        <br><br><br>
+        <h4>Basic Ifs and IfElses!</h4>
+        You can now use <code>custom->runIf [left] [compType] [right] [funcName]</code> and <code>custom->runIfElse [left] [compType] [right] [funcName] [funcNameElse]</code> to run basic ifs. Following compare types are available: ==, >, &lt; Example:
+        <br><br><code class="fullWidth">
+            --> def myFunc;<br>
+            &nbsp;&nbsp;->log hi;<br>
+            --> end;<br><br>
+
+            custom->runIf 4 == 6 myFunc;
+            custom->runIf 6 == 6 myFunc;
+        </code><br><br>
+        This should output: <code>hi</code>
+        <br><br><br>
+        <h4>Other new tiny features</h4>
+        + Reset variables & functions (<code>custom->resetCustomFunctions;</code> and <code>global->reset;</code>)<br>
+        + More math functions (<code>math->sqrt, pow, cos, sin, tan, cosh, sinh and tanh</code>)
+
+        <br><h3 id="changed">Changed</h3>
+        <h4>Definition syntax changed</h4>
+        <div class="warning" style="padding-top: 10px; padding-bottom: 10px; font-size: 16px; font-weight: 800; padding-left: 10px;">Instead of <code>-->def&lt;-- myFunc;</code> and <code>-->end&lt;--;</code>, you now need to use <code>--> def myFunc;</code> and <code>--> end;</code></div>
+
+        <br><h3 id="other">Other notes</h3>
+        Please remember the changed syntax!
+    </div>
+</body>

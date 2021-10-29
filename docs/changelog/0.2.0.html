@@ -1,0 +1,78 @@
+<head>
+    <link rel="stylesheet" href="../style/style.css"/>
+    <title>PoopScriptDocs - Version 0.2.0</title>
+</head>
+<body>
+    <script>
+        window.onload = () => {
+            var els = document.getElementsByClassName("navElem");
+
+            for(el of els) {
+                addNavClick(el, el.getAttribute("data-goto"));
+            }
+        }
+
+        function addNavClick(el, to) {
+            el.addEventListener("click", (ev) => {
+                window.history.pushState({}, to, '#' + to);
+
+                document.getElementById(to).scrollIntoView({
+                    "behavior": "smooth"
+                });
+            });
+        }
+    </script>
+
+    <div class="nav" style="position: fixed; top: 0; left: 0;">
+        <div class="navElem" data-goto="title">Version 0.2.0</div>
+        <div class="navElem" data-goto="summary">Summary</div>
+        <div class="navElem" data-goto="new">New</div>
+        <div class="navElem" data-goto="changed">Changed</div>
+        <div class="navElem" data-goto="other">Other notes</div>
+    </div>
+    <div class="content" style="margin-left: 16vw;">
+        <h1 id="title">Version 0.2.0</h1>
+        <h3>Changelog</h3>
+        <span id="summary">Version 0.2.0 added needed features like disabling specific features and more!</span>
+
+        <br><h3>New</h3>
+        <h4>Disable specific features</h4>
+        You can now specify a list of disabled features. This is useful for the target of the language, user-generated content. When constructing your PoopScriptEnv object, just pass an array of PoopScript method selectors and those will be disabled.
+        There is also a feature called "removal templates" - those are pre-defined lists of disabled features you can use. Examples:
+        <code class="fullWidth">
+            new PoopScriptEnv(["global->eval", "global->alert"]); // disables global->eval and global->alert<br>
+            new PoopScriptEnv(PoopScriptEnv.removalTemplates.simpleUsage); // this is the most strict template - it disables a lot of features
+        </code>
+        <br><br><br>
+        <h4>Custom methods / functions</h4>
+        You can now add custom methods / function. Your "user" can do this, but you can pre-define special functions too. Your user wants to add a custom function? Alright, just do:
+        <code class="fullWidth">
+            --> def myFunc;<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;//> your code;<br>
+            --> end;
+        </code><br><br>
+        To run a function, simply do <code>custom->run myFunc;</code> or use the %_ replacer, like this: <code>->log %_myFunc;</code> - To return a value inside your function use either <code>custom->returnString [string];</code> or <code>custom->returnNumber [number];</code>
+        <br><br>
+        Now, if you want to define a custom function written in JS, you can do:
+        <code class="fullWidth">
+            env.GLOBAL_OBJECTS.math.pow = (words) => { // this would be math->pow<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;return parseFloat(words[1]) ** parseFloat(words[2]);<br>
+            }
+        </code>
+
+        <br><br><br>
+        <h4>Assigning function return value to variables</h4>
+        To assign a function return value to a variable, do <code>global->assign myVar = math->sum 4 12;</code>. You could also use <code>global->set myVar = %_myFunc;</code>
+
+        <br><br><br>
+        <h4>Other new tiny features</h4>
+        + Unset variables (<code>global->unset %%myVar;</code>)<br>
+        + Simple math (<code>math->sum,sub,mul,div 2 3;</code>)
+
+        <br><h3>Changed</h3>
+        Performance was greatly improved.
+
+        <br><h3>Other notes</h3>
+        -
+    </div>
+</body>
