@@ -1,7 +1,0 @@
-- name: Close Pull Request
-  # You may pin to the exact commit or the version.
-  # uses: superbrothers/close-pull-request@941c41e49ced0c13047ed30146e82bd762e907a9
-  uses: superbrothers/close-pull-request@v3.0.0
-  with:
-    # Post a issue comment just before closing a pull request.
-    comment: Pull requests are not accepted.
