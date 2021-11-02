@@ -263,6 +263,11 @@ class PoopScriptEnv {
                 this.GLOBAL_VARS[words[1]][parseInt(words[2])] = words[3]; 
             }
         },
+        string: {
+            "joinWords": (words) => {
+                return words.splice(2).join(words[1]);
+            }
+        },
         custom: {
             "run": (words, specialData) => {
                 return this.exec(this.CUSTOM_FUNCTIONS[words[1]].join(";\n"), specialData.depth+1);

@@ -1,8 +1,3 @@
-/**
- * - license here -
- * @preserve
- */
-
 class PoopScriptEnv {
     GLOBAL_VARS = {};
     #console = null;
@@ -266,6 +261,11 @@ class PoopScriptEnv {
                 }
 
                 this.GLOBAL_VARS[words[1]][parseInt(words[2])] = words[3]; 
+            }
+        },
+        string: {
+            "joinWords": (words) => {
+                return words.splice(2).join(words[1]);
             }
         },
         custom: {
