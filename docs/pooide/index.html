@@ -30,7 +30,8 @@
             "math": ["sum", "sub", "div", "mul", "pow", "sqrt", "sin", "cos", "tan", "sinh", "cosh", "tanh"],
             "global": ["set", "assign", "setType", "unset"],
             "array": ["push", "pop", "set"],
-            "custom": ["run", "runIn", "runEvery", "runIf", "runIfElse", "repeat", "returnString", "returnNumber"]
+            "custom": ["run", "runIn", "runEvery", "runIf", "runIfElse", "repeat", "returnString", "returnNumber"],
+            "string": ["joinWords"]
         }
 
         var acSelIndex = -1;
@@ -86,7 +87,7 @@
             var ac = document.getElementById("ac");
             var acInsert = false;
 
-            if(ev.key == "e" && ev.ctrlKey) {
+            if((ev.key == "e" && ev.ctrlKey) || (ev.key == "s" && ev.ctrlKey)) {
                 ev.preventDefault();
                 ev.stopImmediatePropagation();
                 pseval();
@@ -297,6 +298,10 @@
             textArea.selectionStart = selStart+str.length;
             textArea.selectionEnd = selStart+str.length;
         }
+
+        function openDocs(){
+            window.open("../",  "_blank");
+        }
     </script>
 
     <h1>PooIDE</h1>
@@ -308,7 +313,8 @@
     <button onclick="pseval();" class="btn-editor">Evaluate (CTRL+E)</button>
     <button onclick="psregen();" class="btn-editor">Regenerate Environment</button>
     <button onclick="psstrict(false);" class="btn-editor">Disable strict mode</button>
-    <button onclick="psstrict(true);" class="btn-editor">Enable strict mode</button><br><br>
+    <button onclick="psstrict(true);" class="btn-editor">Enable strict mode</button>
+    <button onclick="openDocs();" class="btn-editor">Open documentation</button><br><br>
     <span>Global vars:</span><div id="vars" class="debug-div"></div><br>
     Custom functions: <div id="funcs" class="debug-div"></div>
 </body>
