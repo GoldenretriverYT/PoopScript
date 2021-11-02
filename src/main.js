@@ -432,7 +432,7 @@ class PoopScriptEnv {
             return;
         }
 
-        var lines = src.split(";");
+        var lines = src.split(/(?<!\\)(?:\\\\)*;/g);
         var lineIndex = 0;
 
         var latestReturn = undefined;
@@ -458,7 +458,7 @@ class PoopScriptEnv {
             }
             lineIndex++;
 
-            var words = line.trim().split(" ");
+            var words = line.replace(/(\\)(\\\\)*;/g, ";").trim().split(" ");
 
             if(words[0] == "-->" && words[1] == "def") {
                 if(currentlyDef.is) throw("Already in definition mode. You cant define methods in methods.");
