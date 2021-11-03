@@ -34,6 +34,7 @@
         <div class="navElem" data-goto="ref">Core Reference</div>
         <div class="navElem navElemIndent" data-goto="ref__globalctx__">__globalctx__</div>
         <div class="navElem navElemIndent" data-goto="refglobal">global</div>
+        <div class="navElem navElemIndent" data-goto="refarray">array</div>
         <div class="navElem navElemIndent" data-goto="refmath">math</div>
         <div class="navElem navElemIndent" data-goto="refcustom">custom</div>
         <div class="navElem" data-goto="changelog">Change Log</div>
@@ -108,18 +109,29 @@
             <li><code>log [string]</code>: Calls the log method on the specified console handler</li>
             <li><code>warn [string]</code>: Calls the warn method on the specified console handler</li>
             <li><code>error [string]</code>: Calls the error method on the specified console handler</li>
+            <li><code>print [string]</code>: Calls the lognnl (log no new line) method on the specified console handler</li>
             <li><code>alert [string]</code>: Creates an alert with text</li>
             <li><code>eval [string]</code>: Executes the JS eval function</li>
             <li><code>throw [string]</code>: Throws an error</li>
+            <li><code>pause [number]</code>: Pauses the execution for x ms (unrecommended, use custom->runIn instead)</li>
         </ul>
         <br>
         <code style="font-size: 16px; font-weight: 800;" id="refglobal">global</code><br>
         global is the global variable scope. Originally, there was a local scope planned too but it wasnt implemented.
         <ul>
             <li><code>set [word (var name)] [word (assignment type)] [string|number (var val)]</code>: Converts value to string sets the variable to the value (assignment types: =, +=, -=, ++, --)</li>
+            <li><code>setType [word (var name)] = [type (string, number, array)] [string|number|word list]</code>: Sets a variable to a specific type. To set an array for example, use <code>global->setType myVar = array 3 1 4 0</code></li>
             <li><code>unset [word (var name)]</code>: Removes a variable.</li>
             <li><code>assign [word (var name)] [word (assignment type)] [string (PoopScript code)]</code>: Runs the one-line (!) PoopScript code. (assignment types: =)</li>
             <li><code>reset</code>: Removes all global variables.</li>
+        </ul>
+        <br>
+        <code style="font-size: 16px; font-weight: 800;" id="refarray">array</code><br>
+        Arrays are lists of items. Arrays in PoopScript are work in progress and might change in future versions.
+        <ul>
+            <li><code>push [word (array name)] [string|number]</code>: Adds element to the array</li>
+            <li><code>pop [word (array name)]</code>: Removes the last element from the array.</li>
+            <li><code>set [word (array name)] [number (index)] = [string|number (value)]</code>: Sets a specific value at index.</li>
         </ul>
         <br>
         <code style="font-size: 16px; font-weight: 800;" id="refmath">math</code><br>
@@ -145,6 +157,8 @@
             <li><code>run [word]</code>: Runs the custom function specified</li>
             <li><code>runIn [word] [number]</code>: Runs the custom function specified in x ms (this does not block the thread!)</li>
             <li><code>runEvery [word] [number]</code>: Runs the custom function specified every x ms (this does not block the thread!)</li>
+            <li><code>runIf [left] ==/>/&lt; [right] [target function]</code>: Runs the custom function if left and right does pass the comparision.</li>
+            <li><code>runIfElse [left] ==/>/&lt; [right] [target function] [else target function]</code>: Runs the target function if left and right does pass the comparision and the else target function if not.</li>
             <li><code>returnString [string]</code>: Returns the given string in your custom function</li>
             <li><code>returnNumber [number]</code>: Returns the given number in your custom, function</li>
             <li><code>resetCustomFunctions</code>: Resets all custom functions.</li>
