@@ -37,6 +37,7 @@
         var acSelIndex = -1;
 
         var errorLinePool = [false, false, false, false, false, false, false, false, false, false] // true if in use, false if not
+        var errorLinePoolFree = 10; // for ec performance
         var lastChange = -9999999;
         var lastMouseMove = -99999999;
 
@@ -123,6 +124,7 @@
                 if(top < document.getElementById("code").getBoundingClientRect().top) return;
                 
                 errorLinePool[errorLine] = true;
+                errorLinePoolFree--;
 
                 var errorLineEl = document.getElementById("errorLine" + errorLine);
                 errorLineEl.innerText = "~".repeat(length);
@@ -132,13 +134,12 @@
                 errorLineEl.style.top = top;
                 return;
             }
-
-            console.warn("Error line pool maxed out!");
         }
 
         function clearErrorLines() {
             for(var errorLine in errorLinePool) {
                 errorLinePool[errorLine] = false;
+                errorLinePoolFree++;
 
                 var errorLineEl = document.getElementById("errorLine" + errorLine);
                 errorLineEl.style.display = "none";
@@ -180,13 +181,14 @@
             }, 100);
 
             document.getElementById("code").addEventListener("scroll", () => {
-                lastChange = 0;
+                lastChange = -800;
                 clearErrorLines();
             });
         }
 
         function doErrorChecking() {
             var textArea = document.getElementById("code");
+            var textAreaCS = window.getComputedStyle(textArea);
             var src = textArea.value;
             var lines = src.split("\n");
 
@@ -196,37 +198,36 @@
             };
 
             var charOffset = 0;
+            var lineIndex = 0;
+            var startTime = Date.now();
+
             for(var line of lines) {
+                lineIndex++;
+
                 if(line.startsWith("//> pooide!disable check ")) {
                     if(line.split(" ")[3].split(";")[0] == "*") {
                         for(var check in Object.keys(checksEnabled)) {
                             checksEnabled[check] = false;
                         }
-                        
-                        return;
+                    }else {
+                        checksEnabled[line.split(" ")[3].split(";")[0]] = false;
                     }
-
-                    checksEnabled[line.split(" ")[3].split(";")[0]] = false;
-                }
-
-                if(line.startsWith("//> pooide!enable check ")) {
+                }else if(line.startsWith("//> pooide!enable check ")) {
                     if(line.split(" ")[3].split(";")[0] == "*") {
                         for(var check in Object.keys(checksEnabled)) {
                             checksEnabled[check] = true;
                         }
-
-                        return;
+                    }else{
+                        checksEnabled[line.split(" ")[3].split(";")[0]] = true;
                     }
-
-                    checksEnabled[line.split(" ")[3].split(";")[0]] = true;
                 }
 
-                if(checksEnabled.semicolon && (!line.endsWith(";") && line != "")){
+                if(!(lineIndex*15 > textArea.scrollTop-textAreaCS.height.split("px")[0] && lineIndex*15 < textArea.scrollTop)) continue;
+
+                if(checksEnabled.semicolon && (!line.endsWith(";") && line != "") && errorLinePoolFree > 0){
                     var rect = getTextBoundingRect(textArea, charOffset, charOffset, false);
                     moveAvailableErrorLineTo(rect.left, rect.top+15, line.length + (countTabs(line)*3), "Did you forget a semicolon?");
-                }
-
-                if(checksEnabled.globalobjects) {
+                }else if(checksEnabled.globalobjects && errorLinePoolFree > 0) {
                     var words = textArea.value.substr(charOffset, charOffset+line.length).split(/[\t\n ]+/g);
                     var firstWord = words[0];
                     var sel = firstWord.split("->");
@@ -243,6 +244,8 @@
 
                 charOffset += line.length + 1;
             }
+
+            console.log("Error checking took " + (Date.now()-startTime) + "ms");
         }
 
         function countTabs(str) {
