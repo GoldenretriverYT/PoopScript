@@ -1,4 +1,4 @@
-* {
+body {
     font-family: Arial;
     color: white;
 }
@@ -8,6 +8,7 @@ body {
 }
 
 button {
+    color: white;
     background-color: #385cbe;
     border-radius: 5px;
     height: 24px;
@@ -26,10 +27,23 @@ button:hover {
 }
 
 textarea {
+    color: white;
     background-color: #242424;
     border-radius: 5px;
     resize: none;
     border: 2px solid black;
+    font-family: monospace;
+}
+
+.errline {
+    color: red;
+    font-family: monospace;
+    font-size: 13.33px;
+    position: absolute;
+}
+
+.errline:active {
+    pointer-events: none;
 }
 
 .codeinput {

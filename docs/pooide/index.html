@@ -36,6 +36,10 @@
 
         var acSelIndex = -1;
 
+        var errorLinePool = [false, false, false, false, false, false, false, false, false, false] // true if in use, false if not
+        var lastChange = -9999999;
+        var lastMouseMove = -99999999;
+
         var env = new PoopScriptEnv();
         env.setCustomConsoleHandler(customConsole);
 
@@ -109,6 +113,38 @@
             }
         }
 
+        function moveAvailableErrorLineTo(left, top, length, error = "No error provided") {
+            for(var errorLine in errorLinePool) {
+                if(errorLinePool[errorLine]) {
+                    continue;
+                }
+
+                if(left < document.getElementById("code").getBoundingClientRect().left) return;
+                if(top < document.getElementById("code").getBoundingClientRect().top) return;
+                
+                errorLinePool[errorLine] = true;
+
+                var errorLineEl = document.getElementById("errorLine" + errorLine);
+                errorLineEl.innerText = "~".repeat(length);
+                errorLineEl.setAttribute("title", error);
+                errorLineEl.style.display = "";
+                errorLineEl.style.left = left;
+                errorLineEl.style.top = top;
+                return;
+            }
+
+            console.warn("Error line pool maxed out!");
+        }
+
+        function clearErrorLines() {
+            for(var errorLine in errorLinePool) {
+                errorLinePool[errorLine] = false;
+
+                var errorLineEl = document.getElementById("errorLine" + errorLine);
+                errorLineEl.style.display = "none";
+            }
+        }
+
         window.onload = () => {
             setInterval(() => {
                 var varDbgRes = "";
@@ -133,10 +169,42 @@
                 }
 
                 document.getElementById("funcs").innerHTML = funcDbgRes;
+
+                lastChange += 100;
+                lastMouseMove += 100;
+
+                if(lastChange > 200) {
+                    lastChange = -999999;
+                    doErrorChecking();
+                }
             }, 100);
+
+            document.getElementById("code").addEventListener("scroll", () => {
+                lastChange = 0;
+                clearErrorLines();
+            });
+        }
+
+        function doErrorChecking() {
+            var textArea = document.getElementById("code");
+            var src = textArea.value;
+            var lines = src.split("\n");
+
+            var charOffset = 0;
+            for(var line of lines) {
+                if(!line.endsWith(";") && line != ""){
+                    var rect = getTextBoundingRect(textArea, charOffset, charOffset, false);
+                    moveAvailableErrorLineTo(rect.left, rect.top+15, line.length, "Did you forget a semicolon?");
+                }
+
+                charOffset += line.length + 1;
+            }
         }
 
         window.onkeydown = (ev) => {
+            lastChange = 0;
+            clearErrorLines();
+
             var textArea = document.getElementById("code");
             var ac = document.getElementById("ac");
             var acInsert = false;
@@ -184,9 +252,13 @@
                         for(acSObj of acObj[sel[0]]) {
                             if(acSObj.startsWith(sel[1])) acList.push(acSObj);
                         }
-                    }else {
+                    }else if(lastWord != "-->") {
                         acList = "Warning: Unknown global object";
                     }
+                }
+
+                if(words[words.length-2] == "-->"){
+                    acList = ["def ", "end"];
                 }
 
                 if(typeof(acList) == "string") {
@@ -370,7 +442,7 @@
                     scrollTop  = win.pageYOffset || isBoxModel && docElem.scrollTop  || body.scrollTop,
                     scrollLeft = win.pageXOffset || isBoxModel && docElem.scrollLeft || body.scrollLeft;
                 return {
-                    top : box.top  + scrollTop  - clientTop - (input.scrollTop-25),
+                    top : box.top  + scrollTop  - clientTop - (input.scrollTop+10),
                     left: box.left + scrollLeft - clientLeft};
             }
             function getInputCSS(prop, isnumber){
@@ -402,7 +474,21 @@
     <div id="ac" style="position: absolute; width: 10vw; height: auto; background-color: #414141; border-radius: 10px; display: none;">
         <button class="ac-el" onclick="">--> def</div>
     </div>
-    <textarea id="code" style="width: 90vw; height: 25vh; margin-bottom: 5px;" placeholder="Input..."></textarea>
+
+    <div id="errorLinePool">
+        <span id="errorLine0" class="errline" style="display: none;">~</span>
+        <span id="errorLine1" class="errline" style="display: none;">~</span>
+        <span id="errorLine2" class="errline" style="display: none;">~</span>
+        <span id="errorLine3" class="errline" style="display: none;">~</span>
+        <span id="errorLine4" class="errline" style="display: none;">~</span>
+        <span id="errorLine5" class="errline" style="display: none;">~</span>
+        <span id="errorLine6" class="errline" style="display: none;">~</span>
+        <span id="errorLine7" class="errline" style="display: none;">~</span>
+        <span id="errorLine8" class="errline" style="display: none;">~</span>
+        <span id="errorLine9" class="errline" style="display: none;">~</span>
+    </div>
+
+    <textarea id="code" spellcheck="false" style="width: 90vw; height: 25vh; margin-bottom: 5px;" placeholder="Input..."></textarea>
     <textarea id="output" readonly="true" style="width: 90vw; height: 25vh; margin-top: 5px;" placeholder="Output..."></textarea><br><br>
     <button onclick="pseval();" class="btn-editor">Evaluate (CTRL+E)</button>
     <button onclick="psregen();" class="btn-editor">Regenerate Environment</button>
