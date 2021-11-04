@@ -62,12 +62,62 @@
             env.setStrict(b);
         }
 
+        function psunset(v) {
+            if(!(v in env.GLOBAL_VARS)) {
+                alert("PooIDE error: Tried to unset undefined variable.");
+                return;
+            }
+
+            delete env.GLOBAL_VARS[v];
+        }
+
+        function psremovefunc(f) {
+            console.log(f);
+
+            if(!(f in env.CUSTOM_FUNCTIONS)) {
+                alert("PooIDE error: Tried to remove undefined function.");
+                return;
+            }
+
+            delete env.CUSTOM_FUNCTIONS[f];
+        }
+
+        function pssetvar(v) {
+            if(!(v in env.GLOBAL_VARS)) {
+                alert("PooIDE error: Tried to set undefined variable.");
+                return;
+            }
+
+            var typeInvalid = true,
+                type = "";
+
+            while(typeInvalid) {
+                type = prompt("What type should it be? (number/string/array)");
+
+                if(type == "number" || type == "string" || type == "array") typeInvalid = false;
+            }
+
+            var setTo = prompt("What should the value be? (Array items are split by spaces!)");
+
+            if(type == "array"){
+                env.GLOBAL_VARS[v] = setTo.split(" ");
+            }else if(type == "number") {
+                env.GLOBAL_VARS[v] = parseFloat(setTo);
+            }else if(type == "string") {
+                env.GLOBAL_VARS[v] = setTo;
+            }
+        }
+
         window.onload = () => {
             setInterval(() => {
                 var varDbgRes = "";
 
                 for(var v of Object.keys(env.GLOBAL_VARS)) {
-                    varDbgRes += "<div style=\"width: 100%; height: 20px; font-size: 16px; line-height: 20px; padding-left: 5px;\">" + v + ": " + env.GLOBAL_VARS[v] + "</div>";
+                    varDbgRes += `<div style="width: 100%; height: 20px; font-size: 16px; line-height: 20px; padding-left: 5px;">
+                                    ${v}: ${env.GLOBAL_VARS[v]}
+                                    <button id="unsetvar-${v}" style="height: 20px; font-size: 16px;">Unset</button>
+                                    <button id="setvar-${v}" style="height: 20px; font-size: 16px;">Set to</button>
+                                  </div>`;
                 }
 
                 document.getElementById("vars").innerHTML = varDbgRes;
@@ -75,11 +125,14 @@
                 var funcDbgRes = "";
 
                 for(var f of Object.keys(env.CUSTOM_FUNCTIONS)) {
-                    funcDbgRes += "<div style=\"width: 100%; height: 20px; font-size: 16px; line-height: 20px; padding-left: 5px;\">" + f + ": " + env.CUSTOM_FUNCTIONS[f].length + " instructions" + "</div>";
+                    funcDbgRes += `<div style="width: 100%; height: 20px; font-size: 16px; line-height: 20px; padding-left: 5px;">
+                        ${f}: ${env.CUSTOM_FUNCTIONS[f].length} instructions
+                        <button id="remfunc-${f}" style="height: 20px; font-size: 16px;">Remove</button>
+                        <button id="readfunc-${f}" style="height: 20px; font-size: 16px;">Read</button></div>`;
                 }
 
                 document.getElementById("funcs").innerHTML = funcDbgRes;
-            }, 250);
+            }, 100);
         }
 
         window.onkeydown = (ev) => {
@@ -171,11 +224,41 @@
             }, 5);
         }
 
-        window.onclick = () => {
+        var clickData = {
+            "unset": null,
+            "remfunc": null,
+            "readfunc": null,
+            "setvar": null,
+        }
+
+        window.addEventListener("mousedown", (ev) => {
+            console.log(ev.target);
+            if(ev.target.id.startsWith("unsetvar")){
+                clickData.unset = ev.target.id;
+            }else if(ev.target.id.startsWith("remfunc")){
+                clickData.remfunc = ev.target.id;
+            }else if(ev.target.id.startsWith("readfunc")){
+                clickData.readfunc = ev.target.id;
+            }else if(ev.target.id.startsWith("setvar")){
+                clickData.setvar = ev.target.id;
+            }
+        });
+
+        window.addEventListener("mouseup", (ev) => {
+            if(ev.target.id == clickData.unset) {
+                psunset(ev.target.id.split("-")[1]);
+            }else if(ev.target.id == clickData.remfunc) {
+                psremovefunc(ev.target.id.split("-")[1]);
+            }else if(ev.target.id == clickData.readfunc) {
+                alert(env.CUSTOM_FUNCTIONS[ev.target.id.split("-")[1]].join(""));
+            }else if(ev.target.id == clickData.setvar) {
+                pssetvar(ev.target.id.split("-")[1]);
+            }
+
             var ac = document.getElementById("ac");
             acSelIndex = -1;
             ac.style.display = "none";
-        }
+        })
 
         // @author Rob W       https://stackoverflow.com/users/938089/rob-w
         // @name               getTextBoundingRect
