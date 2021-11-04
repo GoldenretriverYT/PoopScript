@@ -190,15 +190,28 @@
             var src = textArea.value;
             var lines = src.split("\n");
 
+            var checksEnabled = {
+                "semicolon": true
+            };
+
             var charOffset = 0;
             for(var line of lines) {
-                if(!line.endsWith(";") && line != ""){
+                if(line == "//> pooide!disable check semicolon;") {
+                    checksEnabled.semicolon = false;
+                }
+
+                if(checksEnabled.semicolon && (!line.endsWith(";") && line != "")){
                     var rect = getTextBoundingRect(textArea, charOffset, charOffset, false);
-                    moveAvailableErrorLineTo(rect.left, rect.top+15, line.length, "Did you forget a semicolon?");
+                    moveAvailableErrorLineTo(rect.left, rect.top+15, line.length + (countTabs(line)*3), "Did you forget a semicolon?");
                 }
 
                 charOffset += line.length + 1;
             }
+        }
+
+        function countTabs(str) {
+            const re = /[\t]+/g;
+            return ((str || '').match(re) || []).length;
         }
 
         window.onkeydown = (ev) => {

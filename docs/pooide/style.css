@@ -33,6 +33,7 @@ textarea {
     resize: none;
     border: 2px solid black;
     font-family: monospace;
+    tab-size: 4;
 }
 
 .errline {
