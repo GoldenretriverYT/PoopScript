@@ -51,7 +51,6 @@
                 env.exec(document.getElementById("code").value);
                 customConsole.log("Finished execution of " + document.getElementById("code").value.split(";").length + " operations after " + (Date.now()-start) + "ms");
             }catch(err) {
-                alert(err);
                 customConsole.error(err);
                 customConsole.log("Ended execution early due to an error. Executed " + document.getElementById("code").value.split(";").length + " operations after " + (Date.now()-start) + "ms");
             }
