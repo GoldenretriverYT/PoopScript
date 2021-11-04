@@ -37,7 +37,6 @@
         var acSelIndex = -1;
 
         var errorLinePool = [false, false, false, false, false, false, false, false, false, false] // true if in use, false if not
-        var errorLinePoolFree = 10; // for ec performance
         var lastChange = -9999999;
         var lastMouseMove = -99999999;
 
@@ -124,7 +123,6 @@
                 if(top < document.getElementById("code").getBoundingClientRect().top) return;
                 
                 errorLinePool[errorLine] = true;
-                errorLinePoolFree--;
 
                 var errorLineEl = document.getElementById("errorLine" + errorLine);
                 errorLineEl.innerText = "~".repeat(length);
@@ -139,7 +137,6 @@
         function clearErrorLines() {
             for(var errorLine in errorLinePool) {
                 errorLinePool[errorLine] = false;
-                errorLinePoolFree++;
 
                 var errorLineEl = document.getElementById("errorLine" + errorLine);
                 errorLineEl.style.display = "none";
@@ -222,12 +219,16 @@
                     }
                 }
 
-                if(!(lineIndex*15 > textArea.scrollTop-textAreaCS.height.split("px")[0] && lineIndex*15 < textArea.scrollTop)) continue;
+                if(!((lineIndex-10)*15 > textArea.scrollTop-textAreaCS.height.split("px")[0] && (lineIndex-10)*15 < textArea.scrollTop)) {
+                    charOffset += line.length + 1;
+                    continue;
+                }
 
-                if(checksEnabled.semicolon && (!line.endsWith(";") && line != "") && errorLinePoolFree > 0){
+                console.log(lineIndex);
+                if(checksEnabled.semicolon && (!line.endsWith(";") && line != "")){
                     var rect = getTextBoundingRect(textArea, charOffset, charOffset, false);
                     moveAvailableErrorLineTo(rect.left, rect.top+15, line.length + (countTabs(line)*3), "Did you forget a semicolon?");
-                }else if(checksEnabled.globalobjects && errorLinePoolFree > 0) {
+                }else if(checksEnabled.globalobjects) {
                     var words = textArea.value.substr(charOffset, charOffset+line.length).split(/[\t\n ]+/g);
                     var firstWord = words[0];
                     var sel = firstWord.split("->");
