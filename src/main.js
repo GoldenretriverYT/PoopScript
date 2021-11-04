@@ -11,8 +11,8 @@ class PoopScriptEnv {
         "noJavaScript": ["__globalctx__->eval"],
         "simpleUsage": ["__globalctx__->alert", "__globalctx__->eval", "__globalctx__->throw", "__globalctx__->error", "custom->run", "custom->returnString", "custom->returnNumber", "custom->resetCustomFunctions"],
         "noVars": ["global->set", "global->unset", "global->assign", "global->reset"],
-        "noFuncs": ["custom->run", "custom->returnString", "custom->returnNumber", "custom->resetCustomFunctions"],
-        "noResetting": ["global->unset", "global->reset", "custom->resetCustomFunctions"]
+        "noFuncs": ["custom->run", "custom->returnString", "custom->returnNumber", "custom->reset"],
+        "noResetting": ["global->unset", "global->reset", "custom->reset"]
     };
 
     GLOBAL_OBJECTS = {
@@ -319,8 +319,8 @@ class PoopScriptEnv {
                 var compType = words[2];
                 var right = words[3];
 
-                if(!(compType == "==" || compType == ">" || compType == "<")) {
-                    throw("Invalid compare type, valid types are: ==, >, <");
+                if(!(compType == "==" || compType == ">" || compType == "<" || compType == ">=" || compType == "<=")) {
+                    throw("Invalid compare type, valid types are: ==, >, <, >=, <=");
                 }
 
                 if(compType == "==") {
@@ -333,6 +333,14 @@ class PoopScriptEnv {
                     }
                 }else if(compType == "<") {
                     if(parseFloat(left) < parseFloat(right)) {
+                        this.exec(this.CUSTOM_FUNCTIONS[words[4]].join(";\n"), specialData.depth+1);
+                    }
+                }else if(compType == ">=") {
+                    if(parseFloat(left) >= parseFloat(right)) {
+                        this.exec(this.CUSTOM_FUNCTIONS[words[4]].join(";\n"), specialData.depth+1);
+                    }
+                }else if(compType == "<=") {
+                    if(parseFloat(left) <= parseFloat(right)) {
                         this.exec(this.CUSTOM_FUNCTIONS[words[4]].join(";\n"), specialData.depth+1);
                     }
                 }
@@ -342,8 +350,8 @@ class PoopScriptEnv {
                 var compType = words[2];
                 var right = words[3];
 
-                if(!(compType == "==" || compType == ">" || compType == "<")) {
-                    throw("Invalid compare type, valid types are: ==, >, <");
+                if(!(compType == "==" || compType == ">" || compType == "<" || compType == ">=" || compType == "<=")) {
+                    throw("Invalid compare type, valid types are: ==, >, <, >=, <=");
                 }
 
                 if(compType == "==") {
@@ -360,6 +368,18 @@ class PoopScriptEnv {
                     }
                 }else if(compType == "<") {
                     if(parseFloat(left) < parseFloat(right)) {
+                        this.exec(this.CUSTOM_FUNCTIONS[words[4]].join(";\n"), specialData.depth+1);
+                    }else {
+                        this.exec(this.CUSTOM_FUNCTIONS[words[5]].join(";\n"), specialData.depth+1);
+                    }
+                }else if(compType == ">=") {
+                    if(parseFloat(left) >= parseFloat(right)) {
+                        this.exec(this.CUSTOM_FUNCTIONS[words[4]].join(";\n"), specialData.depth+1);
+                    }else {
+                        this.exec(this.CUSTOM_FUNCTIONS[words[5]].join(";\n"), specialData.depth+1);
+                    }
+                }else if(compType == "<=") {
+                    if(parseFloat(left) <= parseFloat(right)) {
                         this.exec(this.CUSTOM_FUNCTIONS[words[4]].join(";\n"), specialData.depth+1);
                     }else {
                         this.exec(this.CUSTOM_FUNCTIONS[words[5]].join(";\n"), specialData.depth+1);
@@ -372,7 +392,7 @@ class PoopScriptEnv {
             "returnNumber": (words) => {
                 return parseFloat(words[1]);
             },
-            "resetCustomFunctions": (words) => {
+            "reset": (words) => {
                 this.CUSTOM_FUNCTIONS = {};
             }
         }

@@ -48,6 +48,7 @@
                 customConsole.log("Finished execution of " + document.getElementById("code").value.split(";").length + " operations after " + (Date.now()-start) + "ms");
             }catch(err) {
                 alert(err);
+                customConsole.error(err);
             }
         }
 
@@ -387,7 +388,8 @@
         }
     </script>
 
-    <h1>PooIDE</h1>
+    <h1 style="margin-bottom: 5px;">PooIDE</h1>
+    <h4 style="margin-top: 0px;">PooIDE v1.0 with PoopScript v0.3.0</h4>
     <div id="ac" style="position: absolute; width: 10vw; height: auto; background-color: #414141; border-radius: 10px; display: none;">
         <button class="ac-el" onclick="">--> def</div>
     </div>
@@ -398,6 +400,6 @@
     <button onclick="psstrict(false);" class="btn-editor">Disable strict mode</button>
     <button onclick="psstrict(true);" class="btn-editor">Enable strict mode</button>
     <button onclick="openDocs();" class="btn-editor">Open documentation</button><br><br>
-    <span>Global vars:</span><div id="vars" class="debug-div"></div><br>
+    <span>Variables:</span><div id="vars" class="debug-div"></div><br>
     Custom functions: <div id="funcs" class="debug-div"></div>
 </body>

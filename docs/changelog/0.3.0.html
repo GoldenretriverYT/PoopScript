@@ -33,7 +33,7 @@
     <div class="content" style="margin-left: 16vw;">
         <h1 id="title">Version 0.3.0</h1>
         <h3>Changelog</h3>
-        <span id="summary">Version 0.3.0 added more features like new set var operators.</span>
+        <span id="summary">Version 0.3.0 added a lot of new features.</span>
 
         <br><h3 id="new">New</h3>
         <h4>Comments</h4>
@@ -62,7 +62,7 @@
 
         <br><br><br>
         <h4>Basic Ifs and IfElses!</h4>
-        You can now use <code>custom->runIf [left] [compType] [right] [funcName]</code> and <code>custom->runIfElse [left] [compType] [right] [funcName] [funcNameElse]</code> to run basic ifs. Following compare types are available: ==, >, &lt; Example:
+        You can now use <code>custom->runIf [left] [compType] [right] [funcName]</code> and <code>custom->runIfElse [left] [compType] [right] [funcName] [funcNameElse]</code> to run basic ifs. Following compare types are available: ==, >, &lt;, >= and &lt;= Example:
         <br><br><code class="fullWidth">
             --> def myFunc;<br>
             &nbsp;&nbsp;->log hi;<br>
@@ -73,9 +73,19 @@
         </code><br><br>
         This should output: <code>hi</code>
         <br><br><br>
+
+        <h4>Arrays</h4>
+        There is a new type of variables: Arrays! In PoopScript, the implementation is not ideal due to how this scripting language is interpreted. To create an array, you need to use <code>global->setType myVar = array 1 2 3</code> to create an array with 1, 2 and 3 values.<br>
+        To get an value you will need to do <code>->log %$myVar,[index]</code>. Push, pop and set are available in the global object array.
+
+        <br><br><br>
         <h4>Other new tiny features</h4>
         + Reset variables & functions (<code>custom->resetCustomFunctions;</code> and <code>global->reset;</code>)<br>
-        + More math functions (<code>math->sqrt, pow, cos, sin, tan, cosh, sinh and tanh</code>)
+        + More math functions (<code>math->sqrt, pow, cos, sin, tan, cosh, sinh and tanh</code>)<br>
+        + You can now escape semicolons using backslashes!<br>
+        + Join together multiple words (useful because you cant simply do <code>%%var1%%var2</code>, but you would need to do <code>%%var1 %%var2</code>) using <code>string->joinWords [seperator] [...words]</code><br>
+        + Reset global variables & custom functions with <code>global->reset</code> and <code>custom->reset</code><br>
+        + <code>__globalctx__->pause</code> was added. Only use if really necessary - try using <code>custom->runIn</code> instead.
 
         <br><h3 id="changed">Changed</h3>
         <h4>Definition syntax changed</h4>
