@@ -54,8 +54,7 @@ class PoopScriptEnv {
                 while(pStarted > Date.now()-parseFloat(words[1])) {
                     // do nothing lol
                 }
-            },
-            "": (words) => {}
+            }
         },
         math: {
             "sum": (words) => {
