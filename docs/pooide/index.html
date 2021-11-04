@@ -173,7 +173,7 @@
                 ac.style.left = rect.left;
                 ac.style.top = rect.top+40;
 
-                var words = textArea.value.substr(0, textArea.selectionStart).split(" ");
+                var words = textArea.value.substr(0, textArea.selectionStart).split(/[\t\n ]+/g);
                 var lastWord = words[words.length-1];
                 var sel = lastWord.split("->");
 
@@ -184,7 +184,15 @@
                         for(acSObj of acObj[sel[0]]) {
                             if(acSObj.startsWith(sel[1])) acList.push(acSObj);
                         }
+                    }else {
+                        acList = "Warning: Unknown global object";
                     }
+                }
+
+                if(typeof(acList) == "string") {
+                    ac.style.display = "";
+                    ac.innerHTML = acList;
+                    return;
                 }
 
                 if(acSelIndex >= acList.length) {
@@ -268,6 +276,7 @@
         // @param selectionEnd   Optional number: End offset. Default selectionStart
         // @param debug          Optional boolean. If true, the created test layer
         //                         will not be removed.
+        // Slightly changed to fix bug with scrolling
         function getTextBoundingRect(input, selectionStart, selectionEnd, debug) {
             // Basic parameter validation
             if(!input || !('value' in input)) return input;
@@ -361,7 +370,7 @@
                     scrollTop  = win.pageYOffset || isBoxModel && docElem.scrollTop  || body.scrollTop,
                     scrollLeft = win.pageXOffset || isBoxModel && docElem.scrollLeft || body.scrollLeft;
                 return {
-                    top : box.top  + scrollTop  - clientTop,
+                    top : box.top  + scrollTop  - clientTop - (input.scrollTop-25),
                     left: box.left + scrollLeft - clientLeft};
             }
             function getInputCSS(prop, isnumber){
@@ -389,7 +398,7 @@
     </script>
 
     <h1 style="margin-bottom: 5px;">PooIDE</h1>
-    <h4 style="margin-top: 0px;">PooIDE v1.0 with PoopScript v0.3.0</h4>
+    <h4 style="margin-top: 0px;">PooIDE v1.0.1 with PoopScript v0.3.0</h4>
     <div id="ac" style="position: absolute; width: 10vw; height: auto; background-color: #414141; border-radius: 10px; display: none;">
         <button class="ac-el" onclick="">--> def</div>
     </div>
