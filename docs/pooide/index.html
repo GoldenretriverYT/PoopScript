@@ -224,7 +224,6 @@
                     continue;
                 }
 
-                console.log(lineIndex);
                 if(checksEnabled.semicolon && (!line.endsWith(";") && line != "")){
                     var rect = getTextBoundingRect(textArea, charOffset, charOffset, false);
                     moveAvailableErrorLineTo(rect.left, rect.top+15, line.length + (countTabs(line)*3), "Did you forget a semicolon?");
