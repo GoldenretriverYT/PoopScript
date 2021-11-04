@@ -53,6 +53,7 @@
             }catch(err) {
                 alert(err);
                 customConsole.error(err);
+                customConsole.log("Ended execution early due to an error. Executed " + document.getElementById("code").value.split(";").length + " operations after " + (Date.now()-start) + "ms");
             }
         }
 
@@ -191,18 +192,54 @@
             var lines = src.split("\n");
 
             var checksEnabled = {
-                "semicolon": true
+                "semicolon": true,
+                "globalobjects": true
             };
 
             var charOffset = 0;
             for(var line of lines) {
-                if(line == "//> pooide!disable check semicolon;") {
-                    checksEnabled.semicolon = false;
+                if(line.startsWith("//> pooide!disable check ")) {
+                    if(line.split(" ")[3].split(";")[0] == "*") {
+                        for(var check in Object.keys(checksEnabled)) {
+                            checksEnabled[check] = false;
+                        }
+                        
+                        return;
+                    }
+
+                    checksEnabled[line.split(" ")[3].split(";")[0]] = false;
+                }
+
+                if(line.startsWith("//> pooide!enable check ")) {
+                    if(line.split(" ")[3].split(";")[0] == "*") {
+                        for(var check in Object.keys(checksEnabled)) {
+                            checksEnabled[check] = true;
+                        }
+
+                        return;
+                    }
+
+                    checksEnabled[line.split(" ")[3].split(";")[0]] = true;
                 }
 
                 if(checksEnabled.semicolon && (!line.endsWith(";") && line != "")){
                     var rect = getTextBoundingRect(textArea, charOffset, charOffset, false);
                     moveAvailableErrorLineTo(rect.left, rect.top+15, line.length + (countTabs(line)*3), "Did you forget a semicolon?");
+                }
+
+                if(checksEnabled.globalobjects) {
+                    var words = textArea.value.substr(charOffset, charOffset+line.length).split(/[\t\n ]+/g);
+                    var firstWord = words[0];
+                    var sel = firstWord.split("->");
+
+                    var acList = [];
+
+                    if(sel.length > 1) {
+                        if(!(sel[0] in acObj) && firstWord != "-->") {
+                            var rect = getTextBoundingRect(textArea, charOffset, charOffset, false);
+                            moveAvailableErrorLineTo(rect.left, rect.top+15, line.length + (countTabs(line)*3), "Unknown global object. Check your spelling.");
+                        }
+                    }
                 }
 
                 charOffset += line.length + 1;
@@ -270,8 +307,8 @@
                     }
                 }
 
-                if(words[words.length-2] == "-->"){
-                    acList = ["def ", "end"];
+                if(words[words.length-1] == "-->"){
+                    acList = [" def ", " end"];
                 }
 
                 if(typeof(acList) == "string") {
@@ -455,7 +492,7 @@
                     scrollTop  = win.pageYOffset || isBoxModel && docElem.scrollTop  || body.scrollTop,
                     scrollLeft = win.pageXOffset || isBoxModel && docElem.scrollLeft || body.scrollLeft;
                 return {
-                    top : box.top  + scrollTop  - clientTop - (input.scrollTop+10),
+                    top : box.top  + scrollTop  - clientTop - (input.scrollTop+10) + window.scrollY,
                     left: box.left + scrollLeft - clientLeft};
             }
             function getInputCSS(prop, isnumber){
@@ -483,7 +520,7 @@
     </script>
 
     <h1 style="margin-bottom: 5px;">PooIDE</h1>
-    <h4 style="margin-top: 0px;">PooIDE v1.1.0 with PoopScript v0.3.0</h4>
+    <h4 style="margin-top: 0px;">PooIDE v1.2.0 with PoopScript v0.3</h4>
     <div id="ac" style="position: absolute; width: 10vw; height: auto; background-color: #414141; border-radius: 10px; display: none;">
         <button class="ac-el" onclick="">--> def</div>
     </div>

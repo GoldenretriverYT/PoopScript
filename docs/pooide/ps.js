@@ -481,7 +481,10 @@ class PoopScriptEnv {
             var words = line.replace(/(\\)(\\\\)*;/g, ";").trim().split(" ");
 
             if(words[0] == "-->" && words[1] == "def") {
-                if(currentlyDef.is) throw("Already in definition mode. You cant define methods in methods.");
+                if(currentlyDef.is) {
+                    if(iAmMain) this.#mainExecStarted = 0;
+                    throw("Already in definition mode. You cant define methods in methods.");
+                }
 
                 currentlyDef = {
                     is: true,
@@ -491,6 +494,11 @@ class PoopScriptEnv {
 
                 continue;
             }else if(words[0] == "-->" && words[1] == "end") {
+                if(!currentlyDef.is) {
+                    if(iAmMain) this.#mainExecStarted = 0;
+                    throw("Can not exit definition mode, because you aren't even in definition mode!");
+                }
+
                 currentlyDef.is = false;
                 this.CUSTOM_FUNCTIONS[currentlyDef.name] = currentlyDef.lines.slice();
 
@@ -542,10 +550,12 @@ class PoopScriptEnv {
                     }
 
                     if(!(this.GLOBAL_VARS[sel[0]] instanceof Array)) {
+                        if(iAmMain) this.#mainExecStarted = 0;
                         throw("%$ is a special selector reserved for arrays. Use %% instead.");
                     }
 
                     if(parseInt(sel[1]) > this.GLOBAL_VARS[sel[0]].length || parseInt(sel[1]) < 0) {
+                        if(iAmMain) this.#mainExecStarted = 0;
                         throw("Array index out of bounds. (sel: " + sel[1] + ", len: " + this.GLOBAL_VARS[sel[0]].length + ")");
                     }
 
