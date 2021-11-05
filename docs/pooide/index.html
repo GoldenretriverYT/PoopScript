@@ -253,11 +253,13 @@
                     var sel = firstWord.split("->");
 
                     if(sel.length > 1) {
-                        if(!(acObj[sel[0]].includes(sel[1].split(";")[0])) && firstWord != "-->") {
-                            var rect = getTextBoundingRect(textArea, charOffset, charOffset, false);
-                            moveAvailableErrorLineTo(rect.left, rect.top+15, line.length + (countTabs(line)*3), "Unknown function. Check your spelling.");
-                            charOffset += line.length + 1;
-                            continue;
+                        if(sel[0] in acObj){
+                            if(!(acObj[sel[0]].includes(sel[1].split(";")[0])) && firstWord != "-->") {
+                                var rect = getTextBoundingRect(textArea, charOffset, charOffset, false);
+                                moveAvailableErrorLineTo(rect.left, rect.top+15, line.length + (countTabs(line)*3), "Unknown function. Check your spelling.");
+                                charOffset += line.length + 1;
+                                continue;
+                            }
                         }
                     }
                 }
