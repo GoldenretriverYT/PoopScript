@@ -200,8 +200,6 @@
             var startTime = Date.now();
 
             for(var line of lines) {
-                var words = textArea.value.substr(charOffset, charOffset+line.length).split(/[\t\n ]+/g);
-
                 lineIndex++;
 
                 if(line.startsWith("//> pooide!disable check ")) {
@@ -226,6 +224,8 @@
                     charOffset += line.length + 1;
                     continue;
                 }
+
+                var words = textArea.value.substr(charOffset, charOffset+line.length).split(/[\t\n ]+/g);
 
                 if(checksEnabled.semicolon && (!line.endsWith(";") && line != "")){
                     var rect = getTextBoundingRect(textArea, charOffset, charOffset, false);
