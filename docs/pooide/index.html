@@ -191,7 +191,8 @@
 
             var checksEnabled = {
                 "semicolon": true,
-                "globalobjects": true
+                "globalobjects": true,
+                "functions": true,
             };
 
             var charOffset = 0;
@@ -199,6 +200,8 @@
             var startTime = Date.now();
 
             for(var line of lines) {
+                var words = textArea.value.substr(charOffset, charOffset+line.length).split(/[\t\n ]+/g);
+
                 lineIndex++;
 
                 if(line.startsWith("//> pooide!disable check ")) {
@@ -227,17 +230,31 @@
                 if(checksEnabled.semicolon && (!line.endsWith(";") && line != "")){
                     var rect = getTextBoundingRect(textArea, charOffset, charOffset, false);
                     moveAvailableErrorLineTo(rect.left, rect.top+15, line.length + (countTabs(line)*3), "Did you forget a semicolon?");
-                }else if(checksEnabled.globalobjects) {
-                    var words = textArea.value.substr(charOffset, charOffset+line.length).split(/[\t\n ]+/g);
+                    continue;
+                }
+                
+                if(checksEnabled.globalobjects) {
                     var firstWord = words[0];
                     var sel = firstWord.split("->");
-
-                    var acList = [];
 
                     if(sel.length > 1) {
                         if(!(sel[0] in acObj) && firstWord != "-->") {
                             var rect = getTextBoundingRect(textArea, charOffset, charOffset, false);
                             moveAvailableErrorLineTo(rect.left, rect.top+15, line.length + (countTabs(line)*3), "Unknown global object. Check your spelling.");
+                            continue;
+                        }
+                    }
+                }
+                
+                if(checksEnabled.functions) {
+                    var firstWord = words[0];
+                    var sel = firstWord.split("->");
+
+                    if(sel.length > 1) {
+                        if(!(acObj[sel[0]].includes(sel[1].split(";")[0])) && firstWord != "-->") {
+                            var rect = getTextBoundingRect(textArea, charOffset, charOffset, false);
+                            moveAvailableErrorLineTo(rect.left, rect.top+15, line.length + (countTabs(line)*3), "Unknown function. Check your spelling.");
+                            continue;
                         }
                     }
                 }
@@ -304,8 +321,6 @@
                         for(acSObj of acObj[sel[0]]) {
                             if(acSObj.startsWith(sel[1])) acList.push(acSObj);
                         }
-                    }else if(lastWord != "-->") {
-                        acList = "Warning: Unknown global object";
                     }
                 }
 
