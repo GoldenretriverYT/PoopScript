@@ -265,6 +265,7 @@ class PoopScriptEnv {
         },
         string: {
             "joinWords": (words) => {
+                if(words.length < 3 && this.#strict) throw("STRICT: Insufficient arguments passed to string->joinWords!");
                 return words.splice(2).join(words[1]);
             }
         },
@@ -495,8 +496,8 @@ class PoopScriptEnv {
                 continue;
             }else if(words[0] == "-->" && words[1] == "end") {
                 if(!currentlyDef.is) {
-                    if(iAmMain) this.#mainExecStarted = 0;
-                    throw("Can not exit definition mode, because you aren't even in definition mode!");
+                    if(this.#strict && iAmMain) this.#mainExecStarted = 0;
+                    if(this.#strict) throw("Can not exit definition mode, because you aren't even in definition mode!");
                 }
 
                 currentlyDef.is = false;
