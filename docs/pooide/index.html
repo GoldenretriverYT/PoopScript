@@ -48,7 +48,7 @@
             var start = Date.now();
 
             try{
-                env.exec(document.getElementById("code").value);
+                env.exec(document.getElementById("code").value, 0, "PooIde");
                 customConsole.log("Finished execution of " + document.getElementById("code").value.split(";").length + " operations after " + (Date.now()-start) + "ms");
             }catch(err) {
                 customConsole.error(err);

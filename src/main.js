@@ -448,6 +448,14 @@ class PoopScriptEnv {
             this.#mainExecStarted = Date.now();
         }
 
+        var scopeVariables = {
+            depth: depth,
+            isMain: iAmMain,
+            started: Date.now(),
+            maxExecTime: this.#timeoutTime,
+            strict: this.#strict,
+        }
+
         if(depth > 1000) {
             this.#console.error("Recursion limit reached! You should not go deeper than recursion depth 1000!");
             return;
@@ -542,6 +550,13 @@ class PoopScriptEnv {
                     }
 
                     words[i] = this.GLOBAL_VARS[words[i].split("%%")[1]];
+                }else if(words[i].startsWith("%:")) {
+                    if(!(words[i].split("%:")[1] in scopeVariables)) {
+                        words[i] = "undefined";
+                        continue;
+                    }
+
+                    words[i] = scopeVariables[words[i].split("%:")[1]];
                 }else if(words[i].startsWith("%$")) {
                     var sel = words[i].split("%$")[1].split(",");
 
