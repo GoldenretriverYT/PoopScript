@@ -57,14 +57,15 @@
         }
 
         function psregen() {
-            customConsole.log("Regenerated environment.");
             env = new PoopScriptEnv();
             env.setCustomConsoleHandler(customConsole);
+
+            customConsole.log("Regenerated environment.");
         }
 
         function psstrict(b) {
-            customConsole.log("Set strict mode enabled to " + b);
             env.setStrict(b);
+            customConsole.log("Strict mode was set to " + b);
         }
 
         function psunset(v) {
@@ -100,6 +101,8 @@
                 type = prompt("What type should it be? (number/string/array)");
 
                 if(type == "number" || type == "string" || type == "array") typeInvalid = false;
+
+                if(typeInvalid) alert("Invalid type, try again.");
             }
 
             var setTo = prompt("What should the value be? (Array items are split by spaces!)");
