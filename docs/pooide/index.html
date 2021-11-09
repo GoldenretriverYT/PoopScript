@@ -24,15 +24,7 @@
             }
         }
 
-        var acObj = {
-            "": ["alert", "log", "print", "warn", "error", "eval", "throw", "pause"],
-            "__globalctx__": ["alert", "log", "print", "warn", "error", "eval", "throw", "pause"],
-            "math": ["sum", "sub", "div", "mul", "pow", "sqrt", "sin", "cos", "tan", "sinh", "cosh", "tanh"],
-            "global": ["set", "assign", "setType", "unset"],
-            "array": ["push", "pop", "set"],
-            "custom": ["run", "runIn", "runEvery", "runIf", "runIfElse", "repeat", "returnString", "returnNumber"],
-            "string": ["joinWords"]
-        }
+        var acObj = {}
 
         var acSelIndex = -1;
 
@@ -40,10 +32,8 @@
         var lastChange = -9999999;
         var lastMouseMove = -99999999;
 
-        var env = new PoopScriptEnv();
-        env.setCustomConsoleHandler(customConsole);
-
         function pseval() {
+            console.log("[MAIN] Starting execution of entered script...");
             customConsole.log("Started execution...");
             var start = Date.now();
 
@@ -54,21 +44,30 @@
                 customConsole.error(err);
                 customConsole.log("Ended execution early due to an error. Executed " + document.getElementById("code").value.split(";").length + " operations after " + (Date.now()-start) + "ms");
             }
+
+            console.log("[MAIN] Finished execution. (" + (Date.now()-start) + "ms)");
         }
 
         function psregen() {
+            console.log("[MAIN] Regenerating environment...");
+            var start = Date.now();
+
             env = new PoopScriptEnv();
             env.setCustomConsoleHandler(customConsole);
+            rebuildAutoComplete();
 
             customConsole.log("Regenerated environment.");
+            console.log("[MAIN] Renegeration of environment finished. (" + (Date.now()-start) + "ms)");
         }
 
         function psstrict(b) {
+            console.log("[MAIN] User has set strict mode to " + b);
             env.setStrict(b);
             customConsole.log("Strict mode was set to " + b);
         }
 
         function psunset(v) {
+            console.log("[MAIN] User has issued removal of variable " + v);
             if(!(v in env.GLOBAL_VARS)) {
                 alert("PooIDE error: Tried to unset undefined variable.");
                 return;
@@ -78,7 +77,7 @@
         }
 
         function psremovefunc(f) {
-            console.log(f);
+            console.log("[MAIN] User has issued removal of function " + f);
 
             if(!(f in env.CUSTOM_FUNCTIONS)) {
                 alert("PooIDE error: Tried to remove undefined function.");
@@ -89,6 +88,8 @@
         }
 
         function pssetvar(v) {
+            console.log("[MAIN] User is overwriting variable " + v + " with the IDE.");
+
             if(!(v in env.GLOBAL_VARS)) {
                 alert("PooIDE error: Tried to set undefined variable.");
                 return;
@@ -114,6 +115,29 @@
             }else if(type == "string") {
                 env.GLOBAL_VARS[v] = setTo;
             }
+        }
+
+        function rebuildAutoComplete() {
+            console.log("[AC] Rebuilding auto complete list...");
+            var start = Date.now();
+
+            acObj = {};
+
+            for(var obj of Object.keys(env.GLOBAL_OBJECTS)) {
+                acObj[obj] = [];
+
+                for(var subObj of Object.keys(env.GLOBAL_OBJECTS[obj])) {
+                    acObj[obj].push(subObj);
+                }
+            }
+
+            acObj[""] = [];
+
+            for(var subObj of Object.keys(env.GLOBAL_OBJECTS["__globalctx__"])) {
+                acObj[""].push(subObj);
+            }
+
+            console.log("[AC] Finished rebuilding auto complete list! (" + (Date.now()-start) + "ms)");
         }
 
         function moveAvailableErrorLineTo(left, top, length, error = "No error provided") {
@@ -147,6 +171,8 @@
         }
 
         window.onload = () => {
+            psregen();
+
             setInterval(() => {
                 var varDbgRes = "";
 
@@ -200,14 +226,16 @@
 
             var charOffset = 0;
             var lineIndex = 0;
-            var startTime = Date.now();
+
+            console.log("[EC] Performing Error check...");
+            var start = Date.now();
 
             for(var line of lines) {
                 lineIndex++;
 
                 if(line.startsWith("//> pooide!disable check ")) {
                     if(line.split(" ")[3].split(";")[0] == "*") {
-                        for(var check in Object.keys(checksEnabled)) {
+                        for(var check of Object.keys(checksEnabled)) {
                             checksEnabled[check] = false;
                         }
                     }else {
@@ -215,7 +243,7 @@
                     }
                 }else if(line.startsWith("//> pooide!enable check ")) {
                     if(line.split(" ")[3].split(";")[0] == "*") {
-                        for(var check in Object.keys(checksEnabled)) {
+                        for(var check of Object.keys(checksEnabled)) {
                             checksEnabled[check] = true;
                         }
                     }else{
@@ -270,7 +298,7 @@
                 charOffset += line.length + 1;
             }
 
-            console.log("Error checking took " + (Date.now()-startTime) + "ms");
+            console.log("[EC] Finished error check. (" + (Date.now()-start)+ "ms)");
         }
 
         function countTabs(str) {
@@ -279,6 +307,8 @@
         }
 
         window.onkeydown = (ev) => {
+            var start = Date.now();
+
             lastChange = 0;
             clearErrorLines();
 
@@ -545,7 +575,7 @@
     </script>
 
     <h1 style="margin-bottom: 5px;">PooIDE</h1>
-    <h4 style="margin-top: 0px;">PooIDE v1.2.0 with PoopScript v0.3</h4>
+    <h4 style="margin-top: 0px;">PooIDE v1.2.1 with PoopScript v0.3</h4>
     <div id="ac" style="position: absolute; width: 10vw; height: auto; background-color: #414141; border-radius: 10px; display: none;">
         <button class="ac-el" onclick="">--> def</div>
     </div>
