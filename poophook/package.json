@@ -1,0 +1,14 @@
+{
+  "name": "poophook",
+  "version": "1.0.0",
+  "description": "PoopHook allows you to write and run your code in the browser and connect it with a NodeJS process running in the background. Apart from PooIDE, I can't really think of a use case. But PooIDE can also use functions like fs->read with PoopHook!",
+  "main": "poophook.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "socket.io": "^4.3.2"
+  }
+}

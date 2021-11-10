@@ -7,13 +7,9 @@ class PoopScriptEnv {
     #intervalIndex = 0;
     #mainExecStarted = 0;
 
-    static removalTemplates = {
-        "noJavaScript": ["__globalctx__->eval"],
-        "simpleUsage": ["__globalctx__->alert", "__globalctx__->eval", "__globalctx__->throw", "__globalctx__->error", "custom->run", "custom->returnString", "custom->returnNumber", "custom->resetCustomFunctions"],
-        "noVars": ["global->set", "global->unset", "global->assign", "global->reset"],
-        "noFuncs": ["custom->run", "custom->returnString", "custom->returnNumber", "custom->reset"],
-        "noResetting": ["global->unset", "global->reset", "custom->reset"]
-    };
+    #socketIOLoaded = false;
+    #isHooked = false;
+    #socket = null;
 
     GLOBAL_OBJECTS = {
         __globalctx__: {
@@ -97,15 +93,15 @@ class PoopScriptEnv {
         global: {
             "set": (words) => {
                 if(words[1] == undefined) { // well, we DO need a name.
-                    throw("No variable name passed to global->set");
+                    throw(PSConst.errors.NO_VAR_PASSED);
                 }
 
                 if((words[1].match(/([^A-Za-z])+/g) || []).length > 0) { // find all matches of non-alpha chars or return empty array instead of NULL
-                    throw("Invalid variable name - only alphabetic names are allowed.");
+                    throw(PSConst.errors.INV_VAR_NAME);
                 }
 
                 if(!(words[2] == "=" || words[2] == "+=" || words[2] == "-=" || words[2] == "++" || words[2] == "--")) { // This is to prevent accidentally not adding a name for the variable and then wondering why its never correctly replaced
-                    throw("No assignment type sign when setting variable. Types: =, +=, -=, ++, --");
+                    throw(PSConst.getError("INV_ASSIGN", "=, +=, -=, ++, --"));
                 }
 
                 if(words[2] == "="){
@@ -141,15 +137,15 @@ class PoopScriptEnv {
             },
             "setType": (words) => {
                 if(words[1] == undefined) { // well, we DO need a name.
-                    throw("No variable name passed to global->set");
+                    throw(PSConst.errors.NO_VAR_PASSED);
                 }
 
                 if((words[1].match(/([^A-Za-z])+/g) || []).length > 0) { // find all matches of non-alpha chars or return empty array instead of NULL
-                    throw("Invalid variable name - only alphabetic names are allowed.");
+                    throw(PSConst.errors.INV_VAR_NAME);
                 }
 
                 if(!(words[2] == "=")) { // This is to prevent accidentally not adding a name for the variable and then wondering why its never correctly replaced
-                    throw("No assignment type sign when setting variable with specific Type. Types: =");
+                    throw(PSConst.getError("INV_ASSIGN", "="));
                 }
 
                 if(words[2] == "="){
@@ -164,26 +160,26 @@ class PoopScriptEnv {
             },
             "assign": (words) => {
                 if(words[1] == undefined) { // well, we DO need a name.
-                    throw("No variable name passed to global->set");
+                    throw(PSConst.errors.NO_VAR_PASSED);
                 }
 
                 if((words[1].match(/([^A-Za-z])+/g) || []).length > 0) { // find all matches of non-alpha chars or return empty array instead of NULL
-                    throw("Invalid variable name - only alphabetic names are allowed.");
+                    throw(PSConst.errors.INV_VAR_NAME);
                 }
 
                 if(!(words[2] == "=")) { // This is to prevent accidentally not adding a name for the variable and then wondering why its never correctly replaced
-                    throw("No valid assignment type sign when assigning variable. Types: =");
+                    throw(PSConst.getError("INV_ASSIGN", "="));
                 }
 
                 this.GLOBAL_VARS[words[1]] = this.exec(words.splice(3).join(" "));
             },
             "unset": (words) => {
                 if(words[1] == undefined) { // well, we DO need a name.
-                    throw("No variable name passed to global->unset");
+                    throw(PSConst.errors.NO_VAR_PASSED);
                 }
 
                 if((words[1].match(/([^A-Za-z])+/g) || []).length > 0) { // find all matches of non-alpha chars or return empty array instead of NULL
-                    throw("Invalid variable name - only alphabetic names are allowed.");
+                    throw(PSConst.errors.INV_VAR_NAME);
                 }
 
                 if(!(words[1] in this.GLOBAL_VARS)) {
@@ -396,6 +392,122 @@ class PoopScriptEnv {
             "reset": (words) => {
                 this.CUSTOM_FUNCTIONS = {};
             }
+        },
+        psh: {
+            "hook": (words, specialData) => {
+                this.#console.log("Connecting to PoopHook!");
+                if(!this.#isHooked) {
+                    var script = document.createElement('script');
+
+                    script.onload = () => {
+                        this.#console.log("SocketIO loaded - connecting to target.");
+                        this.#socketIOLoaded = true;
+                        this.#socket = io.connect("http://" + words[1] + ":" + words[2] + "/");
+
+                        this.#socket.on("disconnect", () => {
+                            this.#socket.close();
+                            this.#isHooked = false;
+                            this.#socket = null;
+                            this.#console.error("PoopHook got disconnected :( This might be due to invalid auth token or you might've turned off the server.");
+                        });
+
+                        this.#socket.on("connect_error", () => {
+                            this.#socket.close();
+                            this.#isHooked = false;
+                            this.#socket = null;
+                            this.#console.error("Connection error :(");
+                        });
+
+                        this.#socket.on("connect", async () => {
+                            this.#socket.emit("auth", words[3]);
+
+                            this.#socket.once("auth_ret", (res) => {
+                                if(res == "ok") {
+                                    this.#isHooked = true;
+                                    this.exec(this.CUSTOM_FUNCTIONS[words[4]].join(";\n"), specialData.depth+1);
+                                }else {
+                                    this.#console.error("PoopHook Authentication failed :(");
+                                }
+                            });
+                        });
+                    };
+
+                    script.src = "socket.io.min.js";
+                    document.head.appendChild(script);
+                }else {
+                    throw "SocketIO is already loaded and connected.";
+                }
+            },
+            "rawSend": (words) => {
+                if(PSConst.isNode) {
+                    throw "Unsupported in node!";
+                }else {
+                    if(!this.#isHooked) throw PSConst.errors.NO_HOOK;
+                }
+
+                if(this.#isHooked) {
+                    this.#socket.emit(words[1], words.splice(2).join(" "));
+                }
+            }
+        },
+        fs: {
+            "read": (words) => {
+                if(PSConst.isNode) {
+                    var fs = require("fs");
+
+                    return fs.readFileSync(words.splice(3).join(" ")).toString();
+                }else {
+                    if(!this.#isHooked) throw PSConst.errors.NO_HOOK;
+
+                    this.#socket.emit("fsRead", words.splice(3).join(" "));
+
+                    try {
+                        this.#socket.once("fsReadRet", (res) => {
+                            if(res.status == "error") {
+                                this.#console.error(res.data);
+                                return;
+                            }
+
+                            this.GLOBAL_VARS[words[2]] = res.data;
+                            this.exec(this.CUSTOM_FUNCTIONS[words[1]].join(";\n"), specialData.depth+1);
+                        });
+                    }catch(err) { throw err; }
+                }
+            },
+            "write": (words) => {
+                if(PSConst.isNode) {
+                    var fs = require("fs");
+
+                    if((words[1].match(/([^A-Za-z])+/g) || []).length > 0) { // find all matches of non-alpha chars or return empty array instead of NULL
+                        throw(PSConst.errors.INV_VAR_NAME);
+                    }
+
+                    if(!(words[1] in this.GLOBAL_VARS)) {
+                        throw(PSConst.errors.NOT_DEF);
+                    }
+
+                    fs.writeFileSync(this.GLOBAL_VARS[words[1]], words.splice(2).join(" ")).toString();
+                }else {
+                    if(!this.#isHooked) throw PSConst.errors.NO_HOOK;
+                }
+            },
+            "createFile": (words) => {
+                if(PSConst.isNode) {
+                    var fs = require("fs");
+                    fs.writeFileSync(words.splice(1).join(" "), "");
+                }else {
+                    if(!this.#isHooked) throw PSConst.errors.NO_HOOK;
+                }
+            },
+            "createFolder": (words) => {
+                if(PSConst.isNode) {
+                    var fs = require("fs");
+
+                    fs.mkdirSync(words.splice(1).join(" ")).toString();
+                }else {
+                    if(!this.#isHooked) throw PSConst.errors.NO_HOOK;
+                }
+            }
         }
     }
 
@@ -437,6 +549,20 @@ class PoopScriptEnv {
     /** Set the max script execution time in milliseconds */
     setMaxExecutionTime(ms){
         this.#timeoutTime = ms;
+    }
+
+    /** Close socket connection if one is open */
+    closeSocketIO() {
+        if(!(this.#socket == null)) this.#socket.close();
+    }
+
+    /** Once promisified */
+    sioOnce(event) {
+        return new Promise((resolve, reject) => {
+            this.#socket.once(event, (data) => {
+                resolve(data);
+            });
+        });
     }
 
     /** Execute any PoopScript code */
@@ -614,4 +740,42 @@ class PoopScriptEnv {
         if(iAmMain) this.#mainExecStarted = 0;
         return latestReturn;
     }
+}
+
+class PSConst {
+    static errors = {
+        "NO_HOOK": "To use this function, you either need to connect to a PSLang-Hook or run PoopScript from NodeJS.",
+        "NO_VAR_PASSED": "No variables was passed to the function.",
+        "NOT_DEF": "There is no variable named liked this.",
+        "INV_VAR_NAME": "Invalid variable name passed. Variables names can only be alphabetical.",
+        "INV_ASSIGN": "No valid assignment type sign when assigning variable. Types: {0}"
+    }
+
+    /** Used if errors have placeholders to fill. */
+    static getError = (err, ...args) => {
+        var result = PSConst.errors[err];
+
+        for(var i = 0; i < args.length; i++) {
+            result = result.replace(new RegExp("\\{" + i + "\\}", "g"), args[i]);
+        }
+
+        return result;
+    }
+
+    static isNode = ((typeof process !== 'undefined') && (process.versions != null) && (process.versions.node != null));
+
+    static removalTemplates = {
+        "noJavaScript": ["__globalctx__->eval"],
+        "simpleUsage": ["__globalctx__->alert", "__globalctx__->eval", "__globalctx__->throw", "__globalctx__->error", "custom->run", "custom->returnString", "custom->returnNumber", "custom->resetCustomFunctions"],
+        "noVars": ["global->set", "global->unset", "global->assign", "global->reset"],
+        "noFuncs": ["custom->run", "custom->returnString", "custom->returnNumber", "custom->reset"],
+        "noResetting": ["global->unset", "global->reset", "custom->reset"]
+    };
+}
+
+if(PSConst.isNode) {
+    module.exports = {PoopScriptEnv, PSConst}
+}else {
+    window.PoopScriptEnv = PoopScriptEnv;
+    window.PSConst = PSConst;
 }

@@ -52,6 +52,8 @@
             console.log("[MAIN] Regenerating environment...");
             var start = Date.now();
 
+            if("env" in this) env.closeSocketIO();
+
             env = new PoopScriptEnv();
             env.setCustomConsoleHandler(customConsole);
             rebuildAutoComplete();
