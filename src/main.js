@@ -451,7 +451,7 @@ class PoopScriptEnv {
             }
         },
         fs: {
-            "read": (words) => {
+            "read": (words, specialData) => {
                 if(PSConst.isNode) {
                     var fs = require("fs");
 
@@ -469,6 +469,7 @@ class PoopScriptEnv {
                             }
 
                             this.GLOBAL_VARS[words[2]] = res.data;
+                            console.log(this.CUSTOM_FUNCTIONS[words[1]]);
                             this.exec(this.CUSTOM_FUNCTIONS[words[1]].join(";\n"), specialData.depth+1);
                         });
                     }catch(err) { throw err; }
