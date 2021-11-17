@@ -611,7 +611,14 @@ class PoopScriptEnv {
 
                 return;
             }
+
             lineIndex++;
+
+            for(var gv of Object.keys(this.GLOBAL_VARS)) {
+                if(typeof(this.GLOBAL_VARS[gv]) == "object") {
+                    line = line.replace(new RegExp("/(%" + gv + "/", "g"), this.GLOBAL_VARS[gv]);
+                }
+            }
 
             var words = line.replace(/(\\)(\\\\)*;/g, ";").trim().split(" ");
 

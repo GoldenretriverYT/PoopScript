@@ -51,7 +51,7 @@ io.on("connection", (socket) => {
                     return;
                 }
     
-                socket.emit("fsReadRet", {"status": "success", "data": fs.readFileSync(msg)});
+                socket.emit("fsReadRet", {"status": "success", "data": fs.readFileSync(msg).toString()});
             } catch(ex) {
                 socket.emit("fsReadRet", {"status": "error", "data": "fsRead failed: " + ex});
             }
