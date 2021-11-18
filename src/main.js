@@ -455,7 +455,8 @@ class PoopScriptEnv {
                 if(PSConst.isNode) {
                     var fs = require("fs");
 
-                    return fs.readFileSync(words.splice(3).join(" ")).toString();
+                    this.GLOBAL_VARS[words[2]] = fs.readFileSync(words.splice(3).join(" ")).toString();
+                    this.exec(this.CUSTOM_FUNCTIONS[words[1]].join(";\n"), specialData.depth+1);
                 }else {
                     if(!this.#isHooked) throw PSConst.errors.NO_HOOK;
 
@@ -469,7 +470,6 @@ class PoopScriptEnv {
                             }
 
                             this.GLOBAL_VARS[words[2]] = res.data;
-                            console.log(this.CUSTOM_FUNCTIONS[words[1]]);
                             this.exec(this.CUSTOM_FUNCTIONS[words[1]].join(";\n"), specialData.depth+1);
                         });
                     }catch(err) { throw err; }
