@@ -10,29 +10,29 @@ class PoopScriptEnv {
     GLOBAL_OBJECTS = {
         __globalctx__: {
             "alert": (words) => {
-                alert(words.splice(1).join(" "));
+                alert(words[1]);
             },
             "log": (words) => {
-                this.#console.log(words.splice(1).join(" "));
+                this.#console.log(words[1]);
             },
             "print": (words) => {
                 if(!("lognnl" in this.#console)) {
                     throw "Print (log without new line) is not supported by current (custom) console. It needs to support: <cc>.lognnl(str);";
                 }
 
-                this.#console.lognnl(words.splice(1).join(" "));
+                this.#console.lognnl(words[1]);
             },
             "warn": (words) => {
-                this.#console.warn(words.splice(1).join(" "));
+                this.#console.warn(words[1]);
             },
             "error": (words) => {
-                this.#console.error(words.splice(1).join(" "));
+                this.#console.error(words[1]);
             },
             "throw": (words) => {
-                throw(words.splice(1).join(" "));
+                throw(words[1]);
             },
             "eval": (words) => {
-                eval(words.splice(1).join(" "));
+                eval(words[1]);
             },
             "pause": (words) => {
                 if(parseFloat(words[1]) > this.#timeoutTime) {
@@ -101,10 +101,10 @@ class PoopScriptEnv {
                 }
 
                 if(words[2] == "="){
-                    this.GLOBAL_VARS[words[1]] = words.splice(3).join(" ");
+                    this.GLOBAL_VARS[words[1]] = words[3];
                 }else if(words[2] == "+=") {
                     if(isNaN(parseFloat(this.GLOBAL_VARS[words[1]]))) {
-                        this.GLOBAL_VARS[words[1]] = this.GLOBAL_VARS[words[1]] + words.splice(3).join(" ");
+                        this.GLOBAL_VARS[words[1]] = this.GLOBAL_VARS[words[1]] + words[3];
                     }else {
                         this.GLOBAL_VARS[words[1]] = parseFloat(this.GLOBAL_VARS[words[1]]) + parseFloat(words[3]);
                     }
@@ -131,29 +131,6 @@ class PoopScriptEnv {
                     }
                 }
             },
-            "setType": (words) => {
-                if(words[1] == undefined) { // well, we DO need a name.
-                    throw(PSConst.errors.NO_VAR_PASSED);
-                }
-
-                if((words[1].match(/([^A-Za-z])+/g) || []).length > 0) { // find all matches of non-alpha chars or return empty array instead of NULL
-                    throw(PSConst.errors.INV_VAR_NAME);
-                }
-
-                if(!(words[2] == "=")) { // This is to prevent accidentally not adding a name for the variable and then wondering why its never correctly replaced
-                    throw(PSConst.getError("INV_ASSIGN", "="));
-                }
-
-                if(words[2] == "="){
-                    if(words[3] == "string") {
-                        this.GLOBAL_VARS[words[1]] = words.splice(4).join(" ");
-                    }else if(words[3] == "number") {
-                        this.GLOBAL_VARS[words[1]] = parseFloat(words[4]);
-                    }else if(words[3] == "array") {
-                        this.GLOBAL_VARS[words[1]] = words.splice(4);
-                    }
-                }
-            },
             "assign": (words) => {
                 if(words[1] == undefined) { // well, we DO need a name.
                     throw(PSConst.errors.NO_VAR_PASSED);
@@ -167,7 +144,7 @@ class PoopScriptEnv {
                     throw(PSConst.getError("INV_ASSIGN", "="));
                 }
 
-                this.GLOBAL_VARS[words[1]] = this.exec(words.splice(3).join(" "));
+                this.GLOBAL_VARS[words[1]] = this.exec(words[3]);
             },
             "unset": (words) => {
                 if(words[1] == undefined) { // well, we DO need a name.
@@ -380,7 +357,7 @@ class PoopScriptEnv {
                 }
             },
             "returnString": (words) => {
-                return words.splice(1).join(" ");
+                return words[1];
             },
             "returnNumber": (words) => {
                 return parseFloat(words[1]);
@@ -497,7 +474,6 @@ class PoopScriptEnv {
             var strContent = "";
 
             preWords.forEach((val, idx) => {
-                console.log(idx, val);
                 if(val.startsWith("\"") && !inStr) {
                     strStartIdx = idx;
                     inStr = true;
@@ -509,7 +485,11 @@ class PoopScriptEnv {
                 }else if(inStr) {
                     strContent += " " + val;
                 }else {
-                    words.push(val);
+                    if(!isNaN(parseFloat(val))) {
+                        words.push(parseFloat(val));
+                    }else {
+                        words.push(val);
+                    }
                 }
             })
 
