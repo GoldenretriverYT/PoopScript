@@ -101,7 +101,11 @@ class PoopScriptEnv {
                 }
 
                 if(words[2] == "="){
-                    this.GLOBAL_VARS[words[1]] = words[3];
+                    if(isNaN(parseFloat(words[3]))) {
+                        this.GLOBAL_VARS[words[1]] = words[3];
+                    }else {
+                        this.GLOBAL_VARS[words[1]] = parseFloat(words[3]);
+                    }
                 }else if(words[2] == "+=") {
                     if(isNaN(parseFloat(this.GLOBAL_VARS[words[1]]))) {
                         this.GLOBAL_VARS[words[1]] = this.GLOBAL_VARS[words[1]] + words[3];
@@ -110,21 +114,21 @@ class PoopScriptEnv {
                     }
                 }else if(words[2] == "-=") {
                     if(isNaN(parseFloat(this.GLOBAL_VARS[words[1]]))) {
-                        if(this.#strict) throw("Unable to subtract from string.");
+                        if(this.#strict) throw("Unable to subtract from non-number.");
                         return;
                     }else {
                         this.GLOBAL_VARS[words[1]] = parseFloat(this.GLOBAL_VARS[words[1]]) - parseFloat(words[3]);
                     }
                 }else if(words[2] == "++") {
                     if(isNaN(parseFloat(this.GLOBAL_VARS[words[1]]))) {
-                        if(this.#strict) throw("Unable to subtract from string.");
+                        if(this.#strict) throw("Unable to increment non-number.");
                         return;
                     }else {
                         this.GLOBAL_VARS[words[1]] = parseFloat(this.GLOBAL_VARS[words[1]]) + 1;
                     }
                 }else if(words[2] == "--") {
                     if(isNaN(parseFloat(this.GLOBAL_VARS[words[1]]))) {
-                        if(this.#strict) throw("Unable to subtract from string.");
+                        if(this.#strict) throw("Unable to decrement non-number.");
                         return;
                     }else {
                         this.GLOBAL_VARS[words[1]] = parseFloat(this.GLOBAL_VARS[words[1]]) - 1;
