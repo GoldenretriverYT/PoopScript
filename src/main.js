@@ -172,6 +172,9 @@ class PoopScriptEnv {
             },
             "reset": (words) => {
                 this.GLOBAL_VARS = {};
+            },
+            "getFromIndex": (words) => {
+                return words[1][words[2]];
             }
         },
         array: {
@@ -275,6 +278,9 @@ class PoopScriptEnv {
             },
             "charCodeAt": (words) => {
                 return words[1].charCodeAt(words[2]);
+            },
+            "sanitizeHTML": (words) => {
+                return words[1].replace(/<\/?[^>]+(>|$)/g, "");
             }
         },
         json: {
