@@ -1,3 +1,6 @@
+# PoopHook is no longer being maintained.
+PoopHook was an idea but turned out to be a waste of time to make AND use, so I cancelled it. PoopScript and PoopWeb will still be maintained and updated every once in a while.
+
 # A sub-project for PoopScript.
 PoopHook allows you to write and run your code in the browser and connect it with a NodeJS process running in the background. Apart from PooIDE, I can't really think of a use case. But PooIDE can also use functions like fs->read with PoopHook!
 
