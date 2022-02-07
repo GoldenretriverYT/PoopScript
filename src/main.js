@@ -825,6 +825,10 @@
 
         return res.toString();
     }
+
+    runFunction(word) {
+        
+    }
 }
 
 class PSConst {
