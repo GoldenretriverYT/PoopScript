@@ -270,7 +270,7 @@
                     this.GLOBAL_VARS[words[2]] = this.GLOBAL_VARS[words[1]][i];
                     this.GLOBAL_VARS[words[3]] = i;
 
-                    await this.exec(this.CUSTOM_FUNCTIONS[words[4]].join(";\n"), specialData.depth+1);
+                    await this.exec(this.CUSTOM_FUNCTIONS[words[4]].code.join(";\n"), specialData.depth+1);
                 }
             }
         },
@@ -397,11 +397,11 @@
         },
         custom: {
             "run": async (words, specialData) => {
-                return await this.exec(this.CUSTOM_FUNCTIONS[words[1]].join(";\n"), specialData.depth+1).catch((err) => { throw err; });
+                return await this.exec(this.CUSTOM_FUNCTIONS[words[1]].code.join(";\n"), specialData.depth+1).catch((err) => { throw err; });
             },
             "runIn": async(words, specialData) => {
                 setTimeout(async () => {
-                    await this.exec(this.CUSTOM_FUNCTIONS[words[1]].join(";\n"), specialData.depth+1).catch((err) => { throw err; });
+                    await this.exec(this.CUSTOM_FUNCTIONS[words[1]].code.join(";\n"), specialData.depth+1).catch((err) => { throw err; });
                 }, words[2]);
                 
                 return true;
@@ -412,12 +412,12 @@
 
                 if(parseInt(words[2]) == 0) {
                     for(var i = 0; i < parseInt(words[1]); i++) {
-                        this.exec(this.CUSTOM_FUNCTIONS[words[3]].join(";\n"), depth+1);
+                        this.exec(this.CUSTOM_FUNCTIONS[words[3]].code.join(";\n"), depth+1);
                     }
                 }else {
                     this.#intervals[curIndex] = {
                         jsInterval: setInterval(() => {
-                            this.exec(this.CUSTOM_FUNCTIONS[words[3]].join(";\n"), depth+1);
+                            this.exec(this.CUSTOM_FUNCTIONS[words[3]].code.join(";\n"), depth+1);
 
                             this.#intervals[curIndex].done++;
 
@@ -436,7 +436,7 @@
             },
             "runEvery": (words, specialData) => {
                 setInterval(() => {
-                    this.exec(this.CUSTOM_FUNCTIONS[words[1]].join(";\n"), specialData.depth+1);
+                    this.exec(this.CUSTOM_FUNCTIONS[words[1]].code.join(";\n"), specialData.depth+1);
                 }, words[2]);
 
                 return true;
@@ -450,26 +450,13 @@
                     throw("Invalid compare type, valid types are: ==, >, <, >=, <=");
                 }
 
-                if(compType == "==") {
-                    if(left == right) {
-                        await this.exec(this.CUSTOM_FUNCTIONS[words[4]].join(";\n"), specialData.depth+1);
-                    }
-                }else if(compType == ">") {
-                    if(parseFloat(left) > parseFloat(right)) {
-                        await this.exec(this.CUSTOM_FUNCTIONS[words[4]].join(";\n"), specialData.depth+1);
-                    }
-                }else if(compType == "<") {
-                    if(parseFloat(left) < parseFloat(right)) {
-                        await this.exec(this.CUSTOM_FUNCTIONS[words[4]].join(";\n"), specialData.depth+1);
-                    }
-                }else if(compType == ">=") {
-                    if(parseFloat(left) >= parseFloat(right)) {
-                        await this.exec(this.CUSTOM_FUNCTIONS[words[4]].join(";\n"), specialData.depth+1);
-                    }
-                }else if(compType == "<=") {
-                    if(parseFloat(left) <= parseFloat(right)) {
-                        await this.exec(this.CUSTOM_FUNCTIONS[words[4]].join(";\n"), specialData.depth+1);
-                    }
+                if((compType == "==" && left == right) || 
+                    (compType == ">" && parseFloat(left) > parseFloat(right)) ||
+                    (compType == "<" && parseFloat(left) < parseFloat(right)) ||
+                    (compType == ">=" && parseFloat(left) >= parseFloat(right)) ||
+                    (compType == "<=" && parseFloat(left) <= parseFloat(right)))
+                {
+                    await this.exec(this.CUSTOM_FUNCTIONS[words[4]].code.join(";\n"), specialData.depth+1);
                 }
             },
             "runIfElse": async (words, specialData) => {
@@ -481,36 +468,15 @@
                     throw("Invalid compare type, valid types are: ==, >, <, >=, <=");
                 }
 
-                if(compType == "==") {
-                    if(left == right) {
-                        await this.exec(this.CUSTOM_FUNCTIONS[words[4]].join(";\n"), specialData.depth+1);
-                    }else {
-                        await this.exec(this.CUSTOM_FUNCTIONS[words[5]].join(";\n"), specialData.depth+1);
-                    }
-                }else if(compType == ">") {
-                    if(parseFloat(left) > parseFloat(right)) {
-                        await this.exec(this.CUSTOM_FUNCTIONS[words[4]].join(";\n"), specialData.depth+1);
-                    }else {
-                        await this.exec(this.CUSTOM_FUNCTIONS[words[5]].join(";\n"), specialData.depth+1);
-                    }
-                }else if(compType == "<") {
-                    if(parseFloat(left) < parseFloat(right)) {
-                        await this.exec(this.CUSTOM_FUNCTIONS[words[4]].join(";\n"), specialData.depth+1);
-                    }else {
-                        await this.exec(this.CUSTOM_FUNCTIONS[words[5]].join(";\n"), specialData.depth+1);
-                    }
-                }else if(compType == ">=") {
-                    if(parseFloat(left) >= parseFloat(right)) {
-                        await this.exec(this.CUSTOM_FUNCTIONS[words[4]].join(";\n"), specialData.depth+1);
-                    }else {
-                        await this.exec(this.CUSTOM_FUNCTIONS[words[5]].join(";\n"), specialData.depth+1);
-                    }
-                }else if(compType == "<=") {
-                    if(parseFloat(left) <= parseFloat(right)) {
-                        await this.exec(this.CUSTOM_FUNCTIONS[words[4]].join(";\n"), specialData.depth+1);
-                    }else {
-                        await this.exec(this.CUSTOM_FUNCTIONS[words[5]].join(";\n"), specialData.depth+1);
-                    }
+                if((compType == "==" && left == right) || 
+                    (compType == ">" && parseFloat(left) > parseFloat(right)) ||
+                    (compType == "<" && parseFloat(left) < parseFloat(right)) ||
+                    (compType == ">=" && parseFloat(left) >= parseFloat(right)) ||
+                    (compType == "<=" && parseFloat(left) <= parseFloat(right)))
+                {
+                    await this.exec(this.CUSTOM_FUNCTIONS[words[4]].code.join(";\n"), specialData.depth+1);
+                }else {
+                    await this.exec(this.CUSTOM_FUNCTIONS[words[5]].code.join(";\n"), specialData.depth+1);
                 }
             },
             "returnString": (words) => {
@@ -569,6 +535,7 @@
     /** Execute any PoopScript code */
     async exec(src, depth = 0) {
         var iAmMain = false;
+        var excCtx = new PSExecutionContext();
 
         if(this.#mainExecStarted == 0) {
             iAmMain = true;
@@ -602,8 +569,13 @@
         var currentlyCommenting = false;
 
         for(var line of lines) {
-            if(this.stopCode) {
+            if(this.stopCode || excCtx.stopExec) {
                 return;
+            }
+
+            if(excCtx.skipLines > 0) {
+                excCtx.skipLines--;
+                continue;
             }
 
             if(Date.now()-this.#mainExecStarted > this.#timeoutTime) {
@@ -662,10 +634,28 @@
                     if(iAmMain) this.#mainExecStarted = 0;
                     throw("Already in definition mode. You cant define methods in methods.");
                 }
+                
+                var parsedParams = [];
+
+                for(var idx in words) {
+                    if(idx < 3) continue;
+
+                    if(idx % 2 == 1) {
+                        if(words[idx] != "string" || words[idx] != "json" || words[idx] != "number") {
+                            throw(PSConst.getError("INVALID_FUNCTION_PARAM"));
+                        }
+                        parsedParams.push({type: words[idx]});
+                    }
+
+                    if(idx % 2 == 0) {
+                        parsedParams[parsedParams.length-1]["name"] = words[idx];
+                    }
+                }
 
                 currentlyDef = {
                     is: true,
                     name: words[2],
+                    params: parsedParams,
                     lines: []
                 }
 
@@ -677,7 +667,11 @@
                 }
 
                 currentlyDef.is = false;
-                this.CUSTOM_FUNCTIONS[currentlyDef.name] = currentlyDef.lines.slice();
+
+                this.CUSTOM_FUNCTIONS[currentlyDef.name] = {
+                    code: currentlyDef.lines.slice(),
+                    params: currentlyDef.params
+                }
 
                 continue;
             }else if(words[0] == "//>") {
@@ -752,7 +746,7 @@
 
                     words[i] = this.GLOBAL_VARS[sel[0]][parseInt(sel[1])];
                 }else if(words[i].toString().startsWith("%_")) {
-                    words[i] = this.exec(this.CUSTOM_FUNCTIONS[words[i].split("%_")[1]].join(";\n"), depth+1);
+                    words[i] = this.exec(this.CUSTOM_FUNCTIONS[words[i].split("%_")[1]].code.join(";\n"), depth+1);
                 }
             }
 
@@ -766,7 +760,7 @@
                 if(_method in this.GLOBAL_OBJECTS[_obj]) {
                     try {
                         if(this.GLOBAL_OBJECTS[_obj][_method][Symbol.toStringTag] === "AsyncFunction") {
-                            latestReturn = await this.GLOBAL_OBJECTS[_obj][_method](words, {depth: depth}).catch((err) => { throw err; });
+                            latestReturn = await this.GLOBAL_OBJECTS[_obj][_method](words, {depth: depth, excCtx: excCtx}).catch((err) => { throw err; });
                         }else {
                             latestReturn = this.GLOBAL_OBJECTS[_obj][_method](words, {depth: depth});
                         }
@@ -839,7 +833,8 @@ class PSConst {
         "NO_VAR_PASSED": "No variables was passed to the function.",
         "NOT_DEF": "There is no variable named liked this.",
         "INV_VAR_NAME": "Invalid variable name passed. Variables names can only be alphanumerical.",
-        "INV_ASSIGN": "No valid assignment type sign when assigning variable. Types: {0}"
+        "INV_ASSIGN": "No valid assignment type sign when assigning variable. Types: {0}",
+        "INVALID_FUNCTION_PARAM": "Invalid function parameter type. Must be either string, json or number."
     }
 
     /** Used if errors have placeholders to fill. */
@@ -862,6 +857,11 @@ class PSConst {
         "noFuncs": ["custom->run", "custom->returnString", "custom->returnNumber", "custom->reset"],
         "noResetting": ["global->unset", "global->reset", "custom->reset"]
     };
+}
+
+class PSExecutionContext {
+    stopExec = false;
+    skipLines = 0;
 }
 
 if(PSConst.isNode) {
